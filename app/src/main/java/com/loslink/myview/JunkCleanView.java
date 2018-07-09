@@ -24,6 +24,7 @@ import android.view.animation.LinearInterpolator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class JunkCleanView extends View {
@@ -32,15 +33,19 @@ public class JunkCleanView extends View {
     private float canvasWidth,canvasHeight;
     double startRadius=20,endRadius=30;
     int pointAreaW,pointAreaH;
-    private Bitmap circle1;
-    private Matrix matrix1;
-    private Paint mBitPaint,backgroudPaint;
+    private Bitmap circle1,circle2;
+    private Matrix matrix1,matrix2;
+    private Paint mBitPaint,backgroudPaint,mBitUFOLightPaint;
+    List<Bitmap> logoList=new ArrayList<>();
+    List<BunblePoint> mLogoList=new CopyOnWriteArrayList<>();
     private float bgHeight=0;
     private int duration =3000;
     private int bgStartColor= Color.BLUE;
     private int bgEndColor= Color.BLUE;
     private StateListenr stateListenr;
     Rect bgRect=new Rect();
+    private Context mContext;
+    float sxUFO;
 
     public JunkCleanView(Context context) {
         this(context, null);
@@ -52,6 +57,7 @@ public class JunkCleanView extends View {
 
     public JunkCleanView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        mContext=context;
         init(context, attrs, defStyleAttr);
     }
 
@@ -66,12 +72,25 @@ public class JunkCleanView extends View {
         pointAreaW=(int)((canvasWidth*5)/3);
         pointAreaH=(int)((canvasHeight*2)/4);
 
+        sxUFO=(canvasWidth/circle1.getWidth())*0.53f;
+
+        lightY=-circle1.getWidth()*sxUFO+circle1.getHeight()-dip2px(25);
+
+        endX=canvasHeight/2-lightY;
+        startX=endX-canvasHeight/4;
+
+        endY=canvasWidth/2-dip2px(50);
+        startY=-canvasWidth/2+dip2px(50);
     }
 
+    float endX;
+    float startX;
 
+    float endY;
+    float startY;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
+        start();
         return super.onTouchEvent(event);
     }
 
@@ -91,14 +110,21 @@ public class JunkCleanView extends View {
         mBitPaint.setFilterBitmap(true);
         mBitPaint.setDither(true);
 
+        mBitUFOLightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mBitUFOLightPaint.setFilterBitmap(true);
+        mBitUFOLightPaint.setDither(true);
+
         backgroudPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         backgroudPaint.setColor(bgStartColor);
         backgroudPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         backgroudPaint.setAntiAlias(true);
 
 
-        circle1 = ((BitmapDrawable) getResources().getDrawable(R.mipmap.ic_wing_outer)).getBitmap();
+        circle1 = ((BitmapDrawable) getResources().getDrawable(R.mipmap.ic_junk_ufo)).getBitmap();
         matrix1 = new Matrix();
+
+        circle2 = ((BitmapDrawable) getResources().getDrawable(R.mipmap.ic_junk_ufo_light)).getBitmap();
+        matrix2 = new Matrix();
     }
 
 
@@ -107,16 +133,37 @@ public class JunkCleanView extends View {
         this.post(new Runnable() {
             @Override
             public void run() {
+                startThread();
                 startAnimation();
             }
         });
 
     }
 
+    private void startThread(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    for(int i=0;i<logoList.size();i++){
+                        BunblePoint bunblePoint=getRandomPoint();
+                        bunblePoint.logo=logoList.get(i);
+                        mLogoList.add(bunblePoint);
+                        Thread.sleep((long)(duration/logoList.size()));
+                    }
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }).start();
+    }
+
 
     private void startAnimation(){
-
-        final ValueAnimator animatorBg=ValueAnimator.ofFloat(-canvasHeight/3,canvasHeight*2/3);
+        UFOLightAlpha=0;
+        final ValueAnimator animatorBg=ValueAnimator.ofFloat(-(canvasHeight/2+lightY),canvasHeight/2-lightY);
 
         animatorBg.setDuration(200);
         animatorBg.setInterpolator(new LinearInterpolator());
@@ -130,18 +177,92 @@ public class JunkCleanView extends View {
             }
         });
 
+        final ValueAnimator animatorPoints=ValueAnimator.ofInt(1,0);
+        animatorPoints.setDuration(duration);
+        animatorPoints.setInterpolator(new AlerConstantDelerInterploator());
+        animatorPoints.setRepeatCount(0);
+        animatorPoints.setRepeatMode(ValueAnimator.RESTART);
+        animatorPoints.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                calcuPoints(animation);
+                postInvalidate();
+            }
+        });
+
+        animatorPoints.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                if(stateListenr!=null){
+                    stateListenr.animateEnd();
+                }
+            }
+        });
+
+        final ValueAnimator animatorUFOAlphaScale=alphaScaleAnimate(0,1,new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                UFOAlpha= (float) animation.getAnimatedValue();
+                postInvalidate();
+            }
+        });
+        final ValueAnimator animatorUFOLightAlpha=alphaScaleAnimate(0,1,new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                UFOLightAlpha= (float) animation.getAnimatedValue();
+                postInvalidate();
+            }
+        });
+
+        animatorBg.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                animatorUFOAlphaScale.start();
+            }
+        });
+
+        animatorUFOAlphaScale.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                animatorUFOLightAlpha.start();
+
+            }
+        });
+
+        animatorUFOLightAlpha.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                animatorPoints.start();
+            }
+        });
         animatorBg.start();
 
+    }
+
+    float UFOAlpha,UFOLightAlpha;
+    private ValueAnimator alphaScaleAnimate(float start, float end, ValueAnimator.AnimatorUpdateListener updateListener){
+        final ValueAnimator animatorCircleAlphaScale=ValueAnimator.ofFloat(start,end);
+        animatorCircleAlphaScale.setDuration(200);
+        animatorCircleAlphaScale.setInterpolator(new LinearInterpolator());
+        animatorCircleAlphaScale.setRepeatCount(0);
+        animatorCircleAlphaScale.setRepeatMode(ValueAnimator.RESTART);
+        if(updateListener!=null){
+            animatorCircleAlphaScale.addUpdateListener(updateListener);
+        }
+
+        return animatorCircleAlphaScale;
     }
 
     @Override
     protected void onDraw(Canvas canvas)   {
         super.onDraw(canvas);
 
-
         canvas.translate(canvasWidth/2,canvasHeight/2);
-
-        bgRect.set(-(int)canvasWidth/2,-(int)canvasHeight/2,(int)canvasWidth/2,(int)canvasHeight/2);
+        bgRect.set(-(int)canvasWidth/2,-(int)canvasHeight/2,(int)canvasWidth/2,(int)bgHeight);
 
         LinearGradient linearGradient=new LinearGradient(-canvas.getWidth()/2,-canvas.getHeight()/2,
                 canvas.getWidth()/2,canvas.getHeight()/2,
@@ -150,12 +271,65 @@ public class JunkCleanView extends View {
         backgroudPaint.setShader(linearGradient);
         canvas.drawRect(bgRect,backgroudPaint);
 
+        drawUFO(canvas);
+
+        drawCurve(canvas);
+
+    }
+
+    private void drawUFO(Canvas canvas){
+        matrix1.reset();
+        float sxUFO=((float) canvas.getWidth()/circle1.getWidth())*0.53f;
+        matrix1.setScale(sxUFO*UFOAlpha,sxUFO*UFOAlpha);
+        matrix1.postTranslate(-circle1.getWidth()*sxUFO/2,-circle1.getWidth()*sxUFO);
+        canvas.drawBitmap(circle1,matrix1,mBitPaint);
+
+        matrix2.reset();
+        float sxUFOLight=((float) canvas.getWidth()/circle2.getWidth())*0.75f;
+        matrix2.setScale(sxUFOLight,sxUFOLight);
+        matrix2.postTranslate(-circle2.getWidth()*sxUFOLight/2,-circle1.getWidth()*sxUFO+circle1.getHeight()-dip2px(25));
+        mBitUFOLightPaint.setAlpha((int) (255*UFOLightAlpha));
+        canvas.drawBitmap(circle2,matrix2,mBitUFOLightPaint);
+
+    }
+
+    float lightY;//相对于中点为原点
+    private void drawCurve(Canvas canvas){
+        canvas.translate(0,lightY);
+
         canvas.drawLine(-canvasWidth/2,0,canvasWidth/2,0,baselinePaint);
         canvas.drawLine(0,-canvasHeight/2,0,canvasHeight/2,baselinePaint);
+
+        canvas.rotate(90);
+
+        for(int i=0;i<mLogoList.size();i++){
+            BunblePoint bunblePoint=mLogoList.get(i);
+
+            for(float x=bunblePoint.x;x>0;x--){
+                float y=(float) (bunblePoint.aParam*x*Math.sin(bunblePoint.bParam*x));
+                canvas.drawCircle(x,y,1f,baselinePaint);
+            }
+        }
 
 
     }
 
+    private BunblePoint getRandomPoint(){
+        BunblePoint point=new BunblePoint();
+        int x=(int)(Math.random()*(endX-startX)+startX);
+        int y=(int)(Math.random()*(endY-startY)+startY);
+        point.x=x;
+        point.y=y;
+        float K=point.x/1.25f;
+        point.bParam=(float) (2*Math.PI)/K;
+        point.aParam=(float)(point.y/(point.x*Math.sin(point.bParam*point.x)));
+        return point;
+    }
+
+    public int dip2px(int dipValue) {
+        float reSize = mContext.getResources().getDisplayMetrics().density;
+        return (int) ((dipValue * reSize) + 0.5);
+    }
 
 
     private void calcuPoints(ValueAnimator animation){
@@ -182,18 +356,6 @@ public class JunkCleanView extends View {
     }
 
 
-    private ValueAnimator refreshDegree(long duration,ValueAnimator.AnimatorUpdateListener listener){
-        ValueAnimator animator1=ValueAnimator.ofFloat(0,360*((float)duration/1000f));
-        animator1.setDuration(duration);
-        animator1.setInterpolator(new AccelerateDecelerateInterpolator());
-        animator1.setRepeatCount(0);
-        animator1.setRepeatMode(ValueAnimator.RESTART);
-        animator1.addUpdateListener(listener);
-        animator1.start();
-        return animator1;
-    }
-
-
 
     private BunblePoint getNextPoint(BunblePoint point,float step,float paramA,float paramB){
 
@@ -216,6 +378,14 @@ public class JunkCleanView extends View {
         }
 
         return point;
+    }
+
+    public List<Bitmap> getLogoList() {
+        return logoList;
+    }
+
+    public void setLogoList(List<Bitmap> logoList) {
+        this.logoList = logoList;
     }
 
     public StateListenr getStateListenr() {

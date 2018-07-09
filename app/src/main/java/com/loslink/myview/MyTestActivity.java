@@ -29,7 +29,7 @@ public class MyTestActivity extends Activity {
 
     private MTextView MTextView;
     private ImageView iv_test;
-    private AirWingView airWingView;
+    private JunkCleanView jcv_test;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -37,28 +37,20 @@ public class MyTestActivity extends Activity {
         setContentView(R.layout.activity_main);
         MTextView=findViewById(R.id.mt_test);
         iv_test=findViewById(R.id.iv_test);
-        airWingView=findViewById(R.id.awv_test);
+        jcv_test=findViewById(R.id.jcv_test);
 
-        airWingView.setNumber(4000);
         List<Bitmap> list=new ArrayList<>();
-        for(int i=0;i<30;i++){
+        for(int i=0;i<3;i++){
             Bitmap logo = ((BitmapDrawable) getResources().getDrawable(R.mipmap.ic_launcher_round)).getBitmap();
             list.add(logo);
         }
-        airWingView.setLogoList(list);
-        airWingView.setStateListenr(new AirWingView.StateListenr() {
+        jcv_test.setLogoList(list);
+        jcv_test.setStateListenr(new JunkCleanView.StateListenr() {
             @Override
             public void animateEnd() {
 
             }
         });
-        airWingView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                airWingView.start();
-            }
-        });
-
 
         Drawable drawableVoice3 = DrawableCompat.wrap(getResources().getDrawable(R.mipmap.circle3));
         DrawableCompat.setTint(drawableVoice3 , Color.RED);
