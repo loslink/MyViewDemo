@@ -40,7 +40,7 @@ public class MyTestActivity extends Activity {
         jcv_test=findViewById(R.id.jcv_test);
 
         List<Bitmap> list=new ArrayList<>();
-        for(int i=0;i<3;i++){
+        for(int i=0;i<10;i++){
             Bitmap logo = ((BitmapDrawable) getResources().getDrawable(R.mipmap.ic_launcher_round)).getBitmap();
             list.add(logo);
         }

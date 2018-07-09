@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class JunkCleanView extends View {
     int pointAreaW,pointAreaH;
     private Bitmap circle1,circle2;
     private Matrix matrix1,matrix2;
-    private Paint mBitPaint,backgroudPaint,mBitUFOLightPaint;
+    private Paint mBitPaint,backgroudPaint,mBitUFOLightPaint,logoBitPaint;
     List<Bitmap> logoList=new ArrayList<>();
     List<BunblePoint> mLogoList=new CopyOnWriteArrayList<>();
     private float bgHeight=0;
@@ -46,6 +47,7 @@ public class JunkCleanView extends View {
     Rect bgRect=new Rect();
     private Context mContext;
     float sxUFO;
+    private boolean isStartLogo=false;
 
     public JunkCleanView(Context context) {
         this(context, null);
@@ -119,6 +121,9 @@ public class JunkCleanView extends View {
         backgroudPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         backgroudPaint.setAntiAlias(true);
 
+        logoBitPaint= new Paint(Paint.ANTI_ALIAS_FLAG);
+        logoBitPaint.setFilterBitmap(true);
+        logoBitPaint.setDither(true);
 
         circle1 = ((BitmapDrawable) getResources().getDrawable(R.mipmap.ic_junk_ufo)).getBitmap();
         matrix1 = new Matrix();
@@ -130,6 +135,7 @@ public class JunkCleanView extends View {
 
     public void start(){
 
+        lastAnimTime=0;
         this.post(new Runnable() {
             @Override
             public void run() {
@@ -145,11 +151,12 @@ public class JunkCleanView extends View {
             @Override
             public void run() {
                 try {
+                    mLogoList.clear();
                     for(int i=0;i<logoList.size();i++){
                         BunblePoint bunblePoint=getRandomPoint();
                         bunblePoint.logo=logoList.get(i);
                         mLogoList.add(bunblePoint);
-                        Thread.sleep((long)(duration/logoList.size()));
+                        Thread.sleep((long)(duration/logoList.size())/1);
                     }
 
                 } catch (InterruptedException e) {
@@ -179,7 +186,7 @@ public class JunkCleanView extends View {
 
         final ValueAnimator animatorPoints=ValueAnimator.ofInt(1,0);
         animatorPoints.setDuration(duration);
-        animatorPoints.setInterpolator(new AlerConstantDelerInterploator());
+        animatorPoints.setInterpolator(new AccelerateInterpolator());
         animatorPoints.setRepeatCount(0);
         animatorPoints.setRepeatMode(ValueAnimator.RESTART);
         animatorPoints.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -231,11 +238,12 @@ public class JunkCleanView extends View {
 
             }
         });
-
+        isStartLogo=false;
         animatorUFOLightAlpha.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
+                isStartLogo=true;
                 animatorPoints.start();
             }
         });
@@ -273,7 +281,36 @@ public class JunkCleanView extends View {
 
         drawUFO(canvas);
 
-        drawCurve(canvas);
+        if(isStartLogo){
+            drawLogos(canvas);
+        }
+
+//        drawCurve(canvas);
+
+    }
+
+    private void drawLogos(Canvas canvas){
+        canvas.translate(0,lightY);
+
+        canvas.drawLine(-canvasWidth/2,0,canvasWidth/2,0,baselinePaint);
+        canvas.drawLine(0,-canvasHeight/2,0,canvasHeight/2,baselinePaint);
+
+        canvas.rotate(90);
+
+        for(int i=0;i<mLogoList.size();i++){
+            BunblePoint point=mLogoList.get(i);
+            float sx=((float) canvas.getWidth()/point.logo.getWidth())*0.1f;
+            float par=((float) Math.abs(point.x)/(canvasWidth*2/3))*sx;
+//            logoBitPaint.setAlpha((int)(par*255));
+            Matrix matrix=point.matrix;
+            matrix.reset();
+            matrix.setScale(par,par);
+            matrix.postTranslate(point.x,point.y);
+
+            Bitmap logo=point.logo;
+//            matrix.postRotate(point.degree,point.x+matrix.mapRadius(logo.getWidth())/2,point.y+matrix.mapRadius(logo.getHeight())/2);
+            canvas.drawBitmap(logo,matrix,logoBitPaint);
+        }
 
     }
 
@@ -323,6 +360,8 @@ public class JunkCleanView extends View {
         float K=point.x/1.25f;
         point.bParam=(float) (2*Math.PI)/K;
         point.aParam=(float)(point.y/(point.x*Math.sin(point.bParam*point.x)));
+        Matrix matrix = new Matrix();
+        point.matrix=matrix;
         return point;
     }
 
@@ -331,27 +370,16 @@ public class JunkCleanView extends View {
         return (int) ((dipValue * reSize) + 0.5);
     }
 
-
+    private float lastAnimTime;
     private void calcuPoints(ValueAnimator animation){
 
-//        step = (((float)animation.getCurrentPlayTime()-lastAnimTime)/(float) animation.getDuration())
-//                *(canvasWidth/2+pointAreaW);
-//        lastAnimTime=(float) animation.getCurrentPlayTime();
-//        Log.v("calcuPoints",step+"");
-//        float step = this.step +6;
-//        for(int i=0;i<mPointList.size();i++){
-//            BunblePoint point=mPointList.get(i);
-//            if(point.x>=0 && point.y<=0){//第一象限
-//                point=getNextPoint(point,-step,point.aParam,1);
-//            }else if(point.x<0 && point.y<0){//第二象限
-//                point=getNextPoint(point,step,point.aParam,1);
-//            }else if(point.x<=0 && point.y>=0){//第三象限
-//                point=getNextPoint(point,step,point.aParam,-1);
-//            }else{//第四象限
-//                point=getNextPoint(point,-step,point.aParam,-1);
-//            }
-//
-//        }
+        float step = (((float)animation.getCurrentPlayTime()-lastAnimTime)/(float) animation.getDuration())
+                *(canvasHeight*2/3);
+        lastAnimTime=(float) animation.getCurrentPlayTime();
+        for(int i=0;i<mLogoList.size();i++){
+            BunblePoint point=mLogoList.get(i);
+            getNextPoint(point,-step,point.aParam,point.bParam);
+        }
 
     }
 
@@ -361,21 +389,14 @@ public class JunkCleanView extends View {
 
         float x=point.x;
         float y=point.y;
-        if(Math.abs(x) <= Math.abs(step/2)+5){
+        if(x <= 0){
             point.x=0;
             point.y=0;
             return point;
         }
         point.x=x+step;
-        if(y>0){
-            point.y=Math.abs((float) (paramB*Math.sqrt(paramA*point.x)));
-        }else{
-            point.y=-Math.abs((float) (paramB*Math.sqrt(paramA*point.x)));
-        }
-
-        if(Math.abs(point.x)<=canvasWidth/2){
-            point.degree=point.degree+3;
-        }
+        float y2=(float) (paramA*point.x*Math.sin(paramB*point.x));
+        point.y=y2;
 
         return point;
     }
