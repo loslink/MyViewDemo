@@ -89,7 +89,7 @@
         android:id="@+id/jcv_test"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:jduration="8000"
+        app:jduration="2000"
         app:jbgStartColor="@color/bgStartColor"
         app:jbgEndColor="@color/bgEndColor"
         app:layout_constraintBottom_toBottomOf="parent"

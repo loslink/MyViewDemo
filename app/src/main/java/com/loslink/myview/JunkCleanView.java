@@ -32,8 +32,7 @@ public class JunkCleanView extends View {
 
     private Paint baselinePaint;
     private float canvasWidth,canvasHeight;
-    double startRadius=15,endRadius=20;
-    int pointAreaW,pointAreaH;
+    private double startRadius=13,endRadius=18;
     private Bitmap circle1,circle2;
     private Matrix matrix1,matrix2;
     private Paint mBitPaint,backgroudPaint,mBitUFOLightPaint,logoBitPaint,circlePaint;
@@ -46,12 +45,20 @@ public class JunkCleanView extends View {
     private int bgStartColor= Color.BLUE;
     private int bgEndColor= Color.BLUE;
     private StateListenr stateListenr;
-    Rect bgRect=new Rect();
+    private Rect bgRect=new Rect();
     private Context mContext;
-    float sxUFO;
+    private float sxUFO;
     private boolean isStartLogo=false;
     private float lastRadius;
     private float lastCircleX,lastCircleY;
+    private LinearGradient linearGradient;
+    private float startX,endX;
+    private float UFOStartAngle,UFOEndAngle,UFOAngle;
+    private float startY,endY;
+    private float UFOAlphaScaleAfter=1;
+    private float UFOAlpha,UFOLightAlpha,UFOLightAlphaOut=1;
+    private float lightY;//相对于中点为原点
+    private float UFOCenterX=0,UFOCenterY=0;
 
     public JunkCleanView(Context context) {
         this(context, null);
@@ -75,9 +82,6 @@ public class JunkCleanView extends View {
 
         bgHeight=canvasHeight*2/3;
 
-        pointAreaW=(int)((canvasWidth*5)/3);
-        pointAreaH=(int)((canvasHeight*2)/4);
-
         sxUFO=(canvasWidth/circle1.getWidth())*0.53f;
 
         lightY=-circle1.getWidth()*sxUFO+circle1.getHeight()-dip2px(25);
@@ -93,7 +97,6 @@ public class JunkCleanView extends View {
         lastCircleX=-2*lastCircleY;
         lastCircleY=lastCircleY+lightY;
 
-        sxUFO=(canvasWidth/circle1.getWidth())*0.53f;
         UFOCenterX=-lastCircleX;
         UFOCenterY=-lastCircleY+lightY;
 
@@ -106,13 +109,7 @@ public class JunkCleanView extends View {
                 Shader.TileMode.CLAMP);
     }
 
-    LinearGradient linearGradient;
-    float endX;
-    float startX;
-    float UFOStartAngle,UFOEndAngle,UFOAngle;
 
-    float endY;
-    float startY;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         start();
@@ -124,6 +121,7 @@ public class JunkCleanView extends View {
         TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.JunkCleanView);
         bgStartColor= array.getColor(R.styleable.JunkCleanView_jbgStartColor,Color.BLUE);
         bgEndColor= array.getColor(R.styleable.JunkCleanView_jbgEndColor,Color.BLUE);
+        duration= array.getInt(R.styleable.JunkCleanView_jduration,2000);
         array.recycle();
 
         baselinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -223,7 +221,6 @@ public class JunkCleanView extends View {
     }
 
 
-    float UFOAlphaScaleAfter=1;
     private void startAnimation(){
         UFOLightAlpha=0;
         final ValueAnimator animatorBg=ValueAnimator.ofFloat(-(canvasHeight/2+lightY),canvasHeight/2-lightY);
@@ -365,10 +362,10 @@ public class JunkCleanView extends View {
         return true;
     }
 
-    float UFOAlpha,UFOLightAlpha,UFOLightAlphaOut=1;
+
     private ValueAnimator alphaScaleAnimate(float start, float end, ValueAnimator.AnimatorUpdateListener updateListener){
         final ValueAnimator animatorCircleAlphaScale=ValueAnimator.ofFloat(start,end);
-        animatorCircleAlphaScale.setDuration(200);
+        animatorCircleAlphaScale.setDuration(300);
         animatorCircleAlphaScale.setInterpolator(new LinearInterpolator());
         animatorCircleAlphaScale.setRepeatCount(0);
         animatorCircleAlphaScale.setRepeatMode(ValueAnimator.RESTART);
@@ -413,7 +410,7 @@ public class JunkCleanView extends View {
         drawCircles(canvas);
         for(int i=0;i<mLogoList.size();i++){
             BunblePoint point=mLogoList.get(i);
-            float sx=((float) canvas.getWidth()/point.logo.getWidth())*0.2f;
+            float sx=((float) canvas.getWidth()/point.logo.getWidth())*0.18f;
             float par=(Math.abs(point.x+dip2px(50))/(canvasHeight*2/3))*sx;
 
             logoBitPaint.setAlpha((int)(point.alpha*par));
@@ -429,7 +426,7 @@ public class JunkCleanView extends View {
 
     }
 
-    float UFOCenterX=0,UFOCenterY=0;
+
 
     private void drawUFO(Canvas canvas){
         canvas.save();
@@ -441,6 +438,7 @@ public class JunkCleanView extends View {
         matrix1.reset();
         matrix1.setScale(sxUFO*UFOAlpha*UFOAlphaScaleAfter,sxUFO*UFOAlpha*UFOAlphaScaleAfter);
         matrix1.postTranslate(UFOCenterX-circle1.getWidth()*sxUFO*UFOAlpha/2,UFOCenterY-circle1.getHeight()*sxUFO*UFOAlpha/2);
+        mBitPaint.setAlpha((int) (255*UFOAlphaScaleAfter));
         canvas.drawBitmap(circle1,matrix1,mBitPaint);
 
         matrix2.reset();
@@ -456,7 +454,7 @@ public class JunkCleanView extends View {
         canvas.restore();
     }
 
-    float lightY;//相对于中点为原点
+
     private void drawCurve(Canvas canvas){
         canvas.translate(0,lightY);
 
@@ -534,7 +532,7 @@ public class JunkCleanView extends View {
         }else if(point.x<=dip2px(10)){
             point.alpha=0;
         }else{
-            point.alpha=200;
+            point.alpha=150;
         }
         return point;
     }
