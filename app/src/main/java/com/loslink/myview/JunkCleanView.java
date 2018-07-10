@@ -32,15 +32,17 @@ public class JunkCleanView extends View {
 
     private Paint baselinePaint;
     private float canvasWidth,canvasHeight;
-    double startRadius=20,endRadius=30;
+    double startRadius=15,endRadius=20;
     int pointAreaW,pointAreaH;
     private Bitmap circle1,circle2;
     private Matrix matrix1,matrix2;
-    private Paint mBitPaint,backgroudPaint,mBitUFOLightPaint,logoBitPaint;
+    private Paint mBitPaint,backgroudPaint,mBitUFOLightPaint,logoBitPaint,circlePaint;
     List<Bitmap> logoList=new ArrayList<>();
     List<BunblePoint> mLogoList=new CopyOnWriteArrayList<>();
+    List<BunblePoint> mPointList=new ArrayList<>();
+    private int MAX_COUNT=15;
     private float bgHeight=0;
-    private int duration =3000;
+    private int duration =2000;
     private int bgStartColor= Color.BLUE;
     private int bgEndColor= Color.BLUE;
     private StateListenr stateListenr;
@@ -48,6 +50,8 @@ public class JunkCleanView extends View {
     private Context mContext;
     float sxUFO;
     private boolean isStartLogo=false;
+    private float lastRadius;
+    private float lastCircleX,lastCircleY;
 
     public JunkCleanView(Context context) {
         this(context, null);
@@ -83,10 +87,29 @@ public class JunkCleanView extends View {
 
         endY=canvasWidth/2-dip2px(50);
         startY=-canvasWidth/2+dip2px(50);
+
+        lastRadius=canvasWidth/5;
+        lastCircleY=-(float) Math.sqrt((double) (lastRadius*lastRadius/5));
+        lastCircleX=-2*lastCircleY;
+        lastCircleY=lastCircleY+lightY;
+
+        sxUFO=(canvasWidth/circle1.getWidth())*0.53f;
+        UFOCenterX=-lastCircleX;
+        UFOCenterY=-lastCircleY+lightY;
+
+        UFOStartAngle=(float) Math.acos(UFOCenterX/lastRadius);
+        UFOEndAngle=(float)-Math.PI/2;
+
+        linearGradient=new LinearGradient(-canvasWidth/2,-canvasHeight/2,
+                canvasWidth/2,canvasHeight/2,
+                bgStartColor,bgEndColor,
+                Shader.TileMode.CLAMP);
     }
 
+    LinearGradient linearGradient;
     float endX;
     float startX;
+    float UFOStartAngle,UFOEndAngle,UFOAngle;
 
     float endY;
     float startY;
@@ -107,6 +130,11 @@ public class JunkCleanView extends View {
         baselinePaint.setColor(Color.RED);
         baselinePaint.setStyle(Paint.Style.STROKE);
         baselinePaint.setStrokeWidth(2);
+
+        circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        circlePaint.setColor(Color.WHITE);
+        circlePaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        circlePaint.setAntiAlias(true);
 
         mBitPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBitPaint.setFilterBitmap(true);
@@ -135,11 +163,15 @@ public class JunkCleanView extends View {
 
     public void start(){
 
-        lastAnimTime=0;
+        UFOCenterX=-lastCircleX;
+        UFOCenterY=-lastCircleY+lightY;
+        UFOAlphaScaleAfter=1;
+        UFOLightAlphaOut=1;
         this.post(new Runnable() {
             @Override
             public void run() {
                 startThread();
+                startPointsThread();
                 startAnimation();
             }
         });
@@ -156,7 +188,30 @@ public class JunkCleanView extends View {
                         BunblePoint bunblePoint=getRandomPoint();
                         bunblePoint.logo=logoList.get(i);
                         mLogoList.add(bunblePoint);
-                        Thread.sleep((long)(duration/logoList.size())/1);
+                        Thread.sleep((long)((duration)/logoList.size())/1);
+                    }
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }).start();
+    }
+
+    private void startPointsThread(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mPointList.clear();
+                    for(int i=0;i< MAX_COUNT;i++){
+                        BunblePoint bunblePoint=getRandomPoint();
+                        int radius=(int)(Math.random()*(endRadius-startRadius)+startRadius);
+                        bunblePoint.radius=radius;
+                        bunblePoint.alpha=150;
+                        mPointList.add(bunblePoint);
+                        Thread.sleep((long)((duration)/MAX_COUNT));
                     }
 
                 } catch (InterruptedException e) {
@@ -168,6 +223,7 @@ public class JunkCleanView extends View {
     }
 
 
+    float UFOAlphaScaleAfter=1;
     private void startAnimation(){
         UFOLightAlpha=0;
         final ValueAnimator animatorBg=ValueAnimator.ofFloat(-(canvasHeight/2+lightY),canvasHeight/2-lightY);
@@ -184,23 +240,67 @@ public class JunkCleanView extends View {
             }
         });
 
-        final ValueAnimator animatorPoints=ValueAnimator.ofInt(1,0);
-        animatorPoints.setDuration(duration);
-        animatorPoints.setInterpolator(new AccelerateInterpolator());
-        animatorPoints.setRepeatCount(0);
-        animatorPoints.setRepeatMode(ValueAnimator.RESTART);
-        animatorPoints.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        final ValueAnimator animatorLogos=ValueAnimator.ofInt(1,0);
+        animatorLogos.setDuration(duration);
+        animatorLogos.setInterpolator(new AccelerateInterpolator());
+        animatorLogos.setRepeatCount(ValueAnimator.INFINITE);
+        animatorLogos.setRepeatMode(ValueAnimator.RESTART);
+        animatorLogos.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
+                if(checkLogoAllCenter()){
+                    animatorLogos.cancel();
+                    return;
+                }
                 calcuPoints(animation);
                 postInvalidate();
             }
         });
 
-        animatorPoints.addListener(new AnimatorListenerAdapter() {
+        final ValueAnimator animatorUFOAlphaScaleAfter=alphaScaleAnimate(1,0,new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                UFOAlphaScaleAfter= (float) animation.getAnimatedValue();
+                postInvalidate();
+            }
+        });
+
+        final ValueAnimator animatorUFOOut=alphaScaleAnimate(UFOStartAngle,UFOEndAngle,new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                UFOAngle= (float) animation.getAnimatedValue();
+                UFOCenterX=lastRadius*(float) Math.cos(UFOAngle);
+                UFOCenterY=lastRadius*(float) Math.sin(UFOAngle);
+                postInvalidate();
+            }
+        });
+        final ValueAnimator animatorUFOLightAlphaOut=alphaScaleAnimate(1,0,new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                UFOLightAlphaOut= (float) animation.getAnimatedValue();
+                postInvalidate();
+            }
+        });
+
+        animatorLogos.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
+                animatorUFOLightAlphaOut.start();
+            }
+        });
+        animatorUFOLightAlphaOut.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                animatorUFOAlphaScaleAfter.start();
+                animatorUFOOut.start();
+            }
+        });
+        animatorUFOAlphaScaleAfter.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+
                 if(stateListenr!=null){
                     stateListenr.animateEnd();
                 }
@@ -244,14 +344,28 @@ public class JunkCleanView extends View {
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 isStartLogo=true;
-                animatorPoints.start();
+                animatorLogos.start();
             }
         });
         animatorBg.start();
 
     }
 
-    float UFOAlpha,UFOLightAlpha;
+    private boolean checkLogoAllCenter(){
+        for(BunblePoint point:mLogoList){
+            if(point.x!=0 || point.y!=0){
+                return false;
+            }
+        }
+        for(BunblePoint point:mPointList){
+            if(point.x!=0 || point.y!=0){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    float UFOAlpha,UFOLightAlpha,UFOLightAlphaOut=1;
     private ValueAnimator alphaScaleAnimate(float start, float end, ValueAnimator.AnimatorUpdateListener updateListener){
         final ValueAnimator animatorCircleAlphaScale=ValueAnimator.ofFloat(start,end);
         animatorCircleAlphaScale.setDuration(200);
@@ -272,62 +386,74 @@ public class JunkCleanView extends View {
         canvas.translate(canvasWidth/2,canvasHeight/2);
         bgRect.set(-(int)canvasWidth/2,-(int)canvasHeight/2,(int)canvasWidth/2,(int)bgHeight);
 
-        LinearGradient linearGradient=new LinearGradient(-canvas.getWidth()/2,-canvas.getHeight()/2,
-                canvas.getWidth()/2,canvas.getHeight()/2,
-                bgStartColor,bgEndColor,
-                Shader.TileMode.CLAMP);
         backgroudPaint.setShader(linearGradient);
         canvas.drawRect(bgRect,backgroudPaint);
 
         drawUFO(canvas);
-
         if(isStartLogo){
             drawLogos(canvas);
         }
 
-//        drawCurve(canvas);
+    }
 
+    private void drawCircles(Canvas canvas){
+
+        for(int i=0;i<mPointList.size();i++){
+            BunblePoint point=mPointList.get(i);
+            float par=(Math.abs(point.x)/(canvasHeight*2/3));
+            circlePaint.setAlpha((int)(point.alpha*par));
+            canvas.drawCircle(point.x,point.y,point.radius,circlePaint);
+        }
     }
 
     private void drawLogos(Canvas canvas){
         canvas.translate(0,lightY);
-
-        canvas.drawLine(-canvasWidth/2,0,canvasWidth/2,0,baselinePaint);
-        canvas.drawLine(0,-canvasHeight/2,0,canvasHeight/2,baselinePaint);
-
         canvas.rotate(90);
 
+        drawCircles(canvas);
         for(int i=0;i<mLogoList.size();i++){
             BunblePoint point=mLogoList.get(i);
-            float sx=((float) canvas.getWidth()/point.logo.getWidth())*0.1f;
-            float par=((float) Math.abs(point.x)/(canvasWidth*2/3))*sx;
-//            logoBitPaint.setAlpha((int)(par*255));
+            float sx=((float) canvas.getWidth()/point.logo.getWidth())*0.2f;
+            float par=(Math.abs(point.x+dip2px(50))/(canvasHeight*2/3))*sx;
+
+            logoBitPaint.setAlpha((int)(point.alpha*par));
             Matrix matrix=point.matrix;
             matrix.reset();
             matrix.setScale(par,par);
             matrix.postTranslate(point.x,point.y);
 
             Bitmap logo=point.logo;
-//            matrix.postRotate(point.degree,point.x+matrix.mapRadius(logo.getWidth())/2,point.y+matrix.mapRadius(logo.getHeight())/2);
             canvas.drawBitmap(logo,matrix,logoBitPaint);
         }
 
+
     }
 
+    float UFOCenterX=0,UFOCenterY=0;
+
     private void drawUFO(Canvas canvas){
+        canvas.save();
+        canvas.translate(lastCircleX,lastCircleY);
+
+//        canvas.drawLine(-canvasWidth/2,0,canvasWidth/2,0,baselinePaint);
+//        canvas.drawLine(0,-canvasHeight/2,0,canvasHeight/2,baselinePaint);
+
         matrix1.reset();
-        float sxUFO=((float) canvas.getWidth()/circle1.getWidth())*0.53f;
-        matrix1.setScale(sxUFO*UFOAlpha,sxUFO*UFOAlpha);
-        matrix1.postTranslate(-circle1.getWidth()*sxUFO/2,-circle1.getWidth()*sxUFO);
+        matrix1.setScale(sxUFO*UFOAlpha*UFOAlphaScaleAfter,sxUFO*UFOAlpha*UFOAlphaScaleAfter);
+        matrix1.postTranslate(UFOCenterX-circle1.getWidth()*sxUFO*UFOAlpha/2,UFOCenterY-circle1.getHeight()*sxUFO*UFOAlpha/2);
         canvas.drawBitmap(circle1,matrix1,mBitPaint);
 
         matrix2.reset();
         float sxUFOLight=((float) canvas.getWidth()/circle2.getWidth())*0.75f;
         matrix2.setScale(sxUFOLight,sxUFOLight);
-        matrix2.postTranslate(-circle2.getWidth()*sxUFOLight/2,-circle1.getWidth()*sxUFO+circle1.getHeight()-dip2px(25));
-        mBitUFOLightPaint.setAlpha((int) (255*UFOLightAlpha));
+        matrix2.postTranslate(UFOCenterX-circle2.getWidth()*sxUFOLight/2,UFOCenterY+dip2px(15));
+        mBitUFOLightPaint.setAlpha((int) (255*UFOLightAlpha*UFOLightAlphaOut));
         canvas.drawBitmap(circle2,matrix2,mBitUFOLightPaint);
 
+//        canvas.drawCircle(UFOCenterX,UFOCenterY,10,baselinePaint);
+//        canvas.drawCircle(lastCircleX,lastCircleY,10,baselinePaint);
+
+        canvas.restore();
     }
 
     float lightY;//相对于中点为原点
@@ -357,6 +483,8 @@ public class JunkCleanView extends View {
         int y=(int)(Math.random()*(endY-startY)+startY);
         point.x=x;
         point.y=y;
+        point.startX=x;
+        point.startY=y;
         float K=point.x/1.25f;
         point.bParam=(float) (2*Math.PI)/K;
         point.aParam=(float)(point.y/(point.x*Math.sin(point.bParam*point.x)));
@@ -370,17 +498,21 @@ public class JunkCleanView extends View {
         return (int) ((dipValue * reSize) + 0.5);
     }
 
-    private float lastAnimTime;
     private void calcuPoints(ValueAnimator animation){
 
-        float step = (((float)animation.getCurrentPlayTime()-lastAnimTime)/(float) animation.getDuration())
-                *(canvasHeight*2/3);
-        lastAnimTime=(float) animation.getCurrentPlayTime();
         for(int i=0;i<mLogoList.size();i++){
             BunblePoint point=mLogoList.get(i);
+            float progress=1-point.x/point.startX+0.25f;
+            float step=point.startX/mLogoList.size()*progress*progress;
             getNextPoint(point,-step,point.aParam,point.bParam);
         }
 
+        for(int i=0;i<mPointList.size();i++){
+            BunblePoint point=mPointList.get(i);
+            float progress=1-point.x/point.startX+0.25f;
+            float step=point.startX/mPointList.size()*progress*progress;
+            getNextPoint(point,-step,point.aParam,point.bParam);
+        }
     }
 
 
@@ -397,7 +529,13 @@ public class JunkCleanView extends View {
         point.x=x+step;
         float y2=(float) (paramA*point.x*Math.sin(paramB*point.x));
         point.y=y2;
-
+        if(point.x>canvasHeight/2){
+            point.alpha=0;
+        }else if(point.x<=dip2px(10)){
+            point.alpha=0;
+        }else{
+            point.alpha=200;
+        }
         return point;
     }
 

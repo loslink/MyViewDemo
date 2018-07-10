@@ -12,6 +12,8 @@ public class BunblePoint {
 
     public float x;
     public float y;
+    public float startX;
+    public float startY;
     public int alpha;
     public float aParam;
     public float bParam;
