@@ -112,7 +112,7 @@ public class JunkCleanView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        start();
+//        start();
         return super.onTouchEvent(event);
     }
 

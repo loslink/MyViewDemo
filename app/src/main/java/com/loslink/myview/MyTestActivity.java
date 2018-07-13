@@ -45,6 +45,7 @@ public class MyTestActivity extends Activity {
             list.add(logo);
         }
         jcv_test.setLogoList(list);
+        jcv_test.start();
         jcv_test.setStateListenr(new JunkCleanView.StateListenr() {
             @Override
             public void animateEnd() {
