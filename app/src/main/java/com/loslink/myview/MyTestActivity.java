@@ -35,27 +35,27 @@ public class MyTestActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        MTextView=findViewById(R.id.mt_test);
-        iv_test=findViewById(R.id.iv_test);
-        jcv_test=findViewById(R.id.jcv_test);
+//        MTextView=findViewById(R.id.mt_test);
+//        iv_test=findViewById(R.id.iv_test);
+//        jcv_test=findViewById(R.id.jcv_test);
+//
+//        List<Bitmap> list=new ArrayList<>();
+//        for(int i=0;i<10;i++){
+//            Bitmap logo = ((BitmapDrawable) getResources().getDrawable(R.mipmap.ic_launcher_round)).getBitmap();
+//            list.add(logo);
+//        }
+//        jcv_test.setLogoList(list);
+//        jcv_test.start();
+//        jcv_test.setStateListenr(new JunkCleanView.StateListenr() {
+//            @Override
+//            public void animateEnd() {
+//
+//            }
+//        });
 
-        List<Bitmap> list=new ArrayList<>();
-        for(int i=0;i<10;i++){
-            Bitmap logo = ((BitmapDrawable) getResources().getDrawable(R.mipmap.ic_launcher_round)).getBitmap();
-            list.add(logo);
-        }
-        jcv_test.setLogoList(list);
-        jcv_test.start();
-        jcv_test.setStateListenr(new JunkCleanView.StateListenr() {
-            @Override
-            public void animateEnd() {
-
-            }
-        });
-
-        Drawable drawableVoice3 = DrawableCompat.wrap(getResources().getDrawable(R.mipmap.circle3));
-        DrawableCompat.setTint(drawableVoice3 , Color.RED);
-        iv_test.setImageBitmap(drawableToBitmap(drawableVoice3));
+//        Drawable drawableVoice3 = DrawableCompat.wrap(getResources().getDrawable(R.mipmap.circle3));
+//        DrawableCompat.setTint(drawableVoice3 , Color.RED);
+//        iv_test.setImageBitmap(drawableToBitmap(drawableVoice3));
 //        AnalyticsSdk.init(App.get(), new AnalyticsBuilder.Builder()
 //                .setAnalyticsUrl(Consts.Analytics.REPORT_URL) // 设置 上报SDK url ，由接入方运营负责人统一申请
 //                .setAppsFlyerKey(Consts.APPSFLYER_KEY) // 设置 AppsFlyerKey ，如果需要则由接入方运营负责人统一申请

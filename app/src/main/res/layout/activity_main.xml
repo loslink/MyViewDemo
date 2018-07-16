@@ -69,24 +69,37 @@
         android:visibility="gone"
         />
 
-    <com.loslink.myview.AirWingView
-        android:id="@+id/awv_test"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:unit="MB"
-        app:bottomText="Freeable"
-        app:duration="8000"
-        app:number="255"
-        app:bgStartColor="@color/bgStartColor"
-        app:bgEndColor="@color/bgEndColor"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+    <!--<com.loslink.myview.AirWingView-->
+        <!--android:id="@+id/awv_test"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--app:unit="MB"-->
+        <!--app:bottomText="Freeable"-->
+        <!--app:duration="8000"-->
+        <!--app:number="255"-->
+        <!--app:bgStartColor="@color/bgStartColor"-->
+        <!--app:bgEndColor="@color/bgEndColor"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--app:layout_constraintLeft_toLeftOf="parent"-->
+        <!--app:layout_constraintRight_toRightOf="parent"-->
+        <!--app:layout_constraintTop_toTopOf="parent"-->
+        <!--/>-->
 
-    <com.loslink.myview.JunkCleanView
-        android:id="@+id/jcv_test"
+    <!--<com.loslink.myview.JunkCleanView-->
+        <!--android:id="@+id/jcv_test"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--app:jduration="2000"-->
+        <!--app:jbgStartColor="@color/bgStartColor"-->
+        <!--app:jbgEndColor="@color/bgEndColor"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--app:layout_constraintLeft_toLeftOf="parent"-->
+        <!--app:layout_constraintRight_toRightOf="parent"-->
+        <!--app:layout_constraintTop_toTopOf="parent"-->
+        <!--/>-->
+
+    <com.loslink.myview.CpuBoostView
+        android:id="@+id/cbv_test"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:jduration="2000"
