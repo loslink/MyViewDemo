@@ -14,6 +14,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -29,7 +30,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CpuBoostView extends View {
 
-    private Paint baselinePaint;
+    private Paint baselinePaint,bottomTextPaint;
     private float canvasWidth,canvasHeight;
     private Bitmap circle1,circle2,bitmapLight;
     private Matrix matrix1,matrix2,matrixLight;
@@ -43,6 +44,8 @@ public class CpuBoostView extends View {
     private Context mContext;
     private LinearGradient linearGradient;
     private float zuobiao=2f/5;
+    private String bottomText="Scanning the CPU";
+    Rect bottomNum=new Rect();
 
 
     public CpuBoostView(Context context) {
@@ -87,10 +90,10 @@ public class CpuBoostView extends View {
 
     public void init(Context context, AttributeSet attrs, int defStyleAttr) {
 
-        TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.JunkCleanView);
-        bgStartColor= array.getColor(R.styleable.JunkCleanView_jbgStartColor,Color.BLUE);
-        bgEndColor= array.getColor(R.styleable.JunkCleanView_jbgEndColor,Color.BLUE);
-        duration= array.getInt(R.styleable.JunkCleanView_jduration,2000);
+        TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.CpuBoostView);
+        bgStartColor= array.getColor(R.styleable.CpuBoostView_bgStartColor,Color.BLUE);
+        bgEndColor= array.getColor(R.styleable.CpuBoostView_bgEndColor,Color.BLUE);
+        duration= array.getInt(R.styleable.CpuBoostView_duration,2000);
         array.recycle();
 
         baselinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -108,6 +111,12 @@ public class CpuBoostView extends View {
         backgroudPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         backgroudPaint.setAntiAlias(true);
 
+        bottomTextPaint=new Paint();
+        bottomTextPaint.setAntiAlias(true);
+        bottomTextPaint.setTextSize(50);
+        bottomTextPaint.setColor(Color.WHITE);
+        bottomTextPaint.setTypeface(Typeface.DEFAULT);
+        bottomTextPaint.setStyle(Paint.Style.FILL);
 
         circle1 = ((BitmapDrawable) getResources().getDrawable(R.mipmap.ic_cpu_scan_pre)).getBitmap();
         matrix1 = new Matrix();
@@ -135,6 +144,8 @@ public class CpuBoostView extends View {
         isCanScan=false;
         cpuAlpha=0;
         progress=0;
+        lastDismiss=1;
+        lightAlphaScale=1;
         final ValueAnimator animatorBg=ValueAnimator.ofFloat(-canvasHeight*zuobiao,canvasHeight*(1-zuobiao));
 
         animatorBg.setDuration(200);
@@ -174,6 +185,48 @@ public class CpuBoostView extends View {
             }
         });
 
+        final ValueAnimator animatorLightAlphaScale=alphaScaleAnimate(1,0,new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                lightAlphaScale= (float) animation.getAnimatedValue();
+                postInvalidate();
+            }
+        });
+
+        final ValueAnimator animatorLastDismiss=alphaScaleAnimate(1,0,new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                lastDismiss= (float) animation.getAnimatedValue();
+                postInvalidate();
+            }
+        });
+
+        animatorLightAlphaScale.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                animatorLastDismiss.start();
+            }
+        });
+
+        animatorLastDismiss.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                if(stateListenr!=null){
+                    stateListenr.animateEnd();
+                }
+            }
+        });
+
+        animatorCpu.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                animatorLightAlphaScale.start();
+            }
+        });
+
         animatorBg.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -191,6 +244,8 @@ public class CpuBoostView extends View {
             }
         });
     }
+
+    float lightAlphaScale=1,lastDismiss=1;
 
     private ValueAnimator alphaScaleAnimate(float start, float end, ValueAnimator.AnimatorUpdateListener updateListener){
         final ValueAnimator animatorCircleAlphaScale=ValueAnimator.ofFloat(start,end);
@@ -222,6 +277,10 @@ public class CpuBoostView extends View {
 
         drawCPU(canvas);
 
+        bottomTextPaint.setTextSize(cpuAlpha*lastDismiss*50);
+        bottomTextPaint.getTextBounds(bottomText,0,bottomText.length(),bottomNum);
+        bottomTextPaint.setAlpha((int)(cpuAlpha*lastDismiss*255));
+        canvas.drawText(bottomText,-bottomNum.width()/2,circle2.getHeight(),bottomTextPaint);
     }
 
     private void drawCPU(Canvas canvas){
@@ -230,19 +289,24 @@ public class CpuBoostView extends View {
 //        canvas.drawLine(0,-canvasHeight*zuobiao,0,canvasHeight*(1-zuobiao),baselinePaint);
 
         matrix1.reset();
-        matrix1.setScale(sx*cpuAlpha,sx*cpuAlpha);
-        matrix1.postTranslate(-cpuWhidth*cpuAlpha/2,-cpuHeight*cpuAlpha/2);
+        matrix1.setScale(sx*cpuAlpha*lastDismiss,sx*cpuAlpha*lastDismiss);
+        matrix1.postTranslate(-cpuWhidth*cpuAlpha*lastDismiss/2,-cpuHeight*cpuAlpha*lastDismiss/2);
+        mBitPaint.setAlpha((int)(255*lastDismiss));
         canvas.drawBitmap(circle1,matrix1,mBitPaint);
 
         Rect src=new Rect(0,0,circle2.getWidth(),(int)(circle2.getHeight()*progress));
         RectF dst=new RectF(-cpuWhidth/2,-cpuHeight/2,cpuWhidth/2,cpuHeight*progress-cpuHeight/2);
+//        dst.left=-cpuWhidth/2+(canvasWidth/2-cpuWhidth/2)*(1-lastDismiss);
+//        dst.top=-cpuHeight/2+(canvasHeight*zuobiao-cpuHeight/2)*(1-lastDismiss);
+//        dst.right=(cpuWhidth/2)*lastDismiss;
+//        dst.bottom=(cpuHeight*progress-cpuHeight/2)*lastDismiss;
         canvas.drawBitmap(circle2,src,dst,mBitPaint);
 
         if(isCanScan){
             float sx2=(canvasWidth/bitmapLight.getWidth())*0.7f;
             matrixLight.reset();
-            matrixLight.setScale(sx2,sx2);
-            matrixLight.postTranslate(-bitmapLight.getWidth()*sx2/2,cpuHeight*progress-cpuHeight/2);
+            matrixLight.setScale(sx2*lightAlphaScale,sx2*lightAlphaScale);
+            matrixLight.postTranslate(-bitmapLight.getWidth()*sx2*lightAlphaScale/2,cpuHeight*progress-cpuHeight/2);
             canvas.drawBitmap(bitmapLight,matrixLight,mBitPaint);
         }
 

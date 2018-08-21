@@ -1,18 +1,28 @@
 <resources>
 
+    <attr name="duration" format="integer"/>
+    <attr name="bgStartColor" format="color"/>
+    <attr name="bgEndColor" format="color"/>
+
     <declare-styleable name="AirWingView">
         <attr name="number" format="integer"/>
         <attr name="unit" format="string"/>
         <attr name="bottomText" format="string"/>
-        <attr name="duration" format="integer"/>
-        <attr name="bgStartColor" format="color"/>
-        <attr name="bgEndColor" format="color"/>
+        <attr name="duration"/>
+        <attr name="bgStartColor" />
+        <attr name="bgEndColor" />
     </declare-styleable>
 
     <declare-styleable name="JunkCleanView">
         <attr name="jduration" format="integer"/>
         <attr name="jbgStartColor" format="color"/>
         <attr name="jbgEndColor" format="color"/>
+    </declare-styleable>
+
+    <declare-styleable name="CpuBoostView">
+        <attr name="duration" />
+        <attr name="bgStartColor" />
+        <attr name="bgEndColor" />
     </declare-styleable>
 
 </resources>

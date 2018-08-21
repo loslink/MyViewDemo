@@ -102,13 +102,20 @@
         android:id="@+id/cbv_test"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:jduration="2000"
-        app:jbgStartColor="@color/bgStartColor"
-        app:jbgEndColor="@color/bgEndColor"
+        app:duration="2000"
+        app:bgStartColor="@color/bgStartColor"
+        app:bgEndColor="@color/bgEndColor"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         />
+
+    <com.loslink.myview.SwitchButton
+        android:id="@+id/sb_my"
+        android:layout_width="90dp"
+        android:layout_height="40dp"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="50dp" />
 
 </android.support.constraint.ConstraintLayout>
