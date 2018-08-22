@@ -113,9 +113,10 @@
 
     <com.loslink.myview.SwitchButton
         android:id="@+id/sb_my"
-        android:layout_width="90dp"
-        android:layout_height="40dp"
+        android:layout_width="220dp"
+        android:layout_height="50dp"
         android:layout_centerHorizontal="true"
-        android:layout_margin="50dp" />
+        android:layout_marginLeft="100dp"
+        android:layout_marginStart="100dp"/>
 
 </android.support.constraint.ConstraintLayout>

@@ -6,4 +6,7 @@
 
     <color name="bgStartColor">#4262d5</color>
     <color name="bgEndColor">#498ef3</color>
+
+    <color name="buttonCircleColor">#767676</color>
+    <color name="buttonBaseColor">#545454</color>
 </resources>
