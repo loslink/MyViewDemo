@@ -11,7 +11,9 @@ import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.Nullable;
@@ -306,6 +308,10 @@ public class AirWingView extends View {
         drawCircles(canvas);
         drawCenterCircles(canvas);
         drawLogos(canvas);
+
+//        Path mPath=new Path();
+//        mPath.addCircle(50, 50, 50, Path.Direction.CCW);
+//        canvas.clipPath(mPath, Region.Op.REPLACE);
 
         if(numbering!=0){
 

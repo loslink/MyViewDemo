@@ -11,15 +11,20 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.loslink.myview.R;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by Administrator on 2018/5/16.
@@ -30,11 +35,16 @@ public class MyTestActivity extends Activity {
     private MTextView MTextView;
     private ImageView iv_test;
     private JunkCleanView jcv_test;
+    private ImageView iv_gif;
+    private FloatBallView floatBallView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        iv_gif=findViewById(R.id.iv_gif);
+        floatBallView=findViewById(R.id.fv);
 //        MTextView=findViewById(R.id.mt_test);
 //        iv_test=findViewById(R.id.iv_test);
 //        jcv_test=findViewById(R.id.jcv_test);
@@ -66,6 +76,26 @@ public class MyTestActivity extends Activity {
 ////                .setBuglyAppId(BuildConfig.BUGLY_ID) // 设置 BuglyAppId ，由接入方运营负责人统一申请
 ////                .setBuglyDebugMode(false) // 设置是否开启 BuglyDebugMode
 //                .build());
+
+        String gifUrl=Environment.getExternalStorageDirectory().getAbsolutePath()+"/Download/bg.gif";
+
+        File file=new File(gifUrl);
+        if(file.exists()){
+//            gifUrl = "http://i.kinja-img.com/gawker-media/image/upload/s--B7tUiM5l--/gf2r69yorbdesguga10i.gif";
+
+            Glide.with(this)
+                    .load(gifUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(iv_gif);
+        }
+
+        floatBallView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                floatBallView.setProgress(new Random().nextFloat());
+                floatBallView.startAnimation();
+            }
+        });
     }
 
     public static Bitmap drawableToBitmap(Drawable drawable) {

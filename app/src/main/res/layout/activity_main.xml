@@ -112,11 +112,32 @@
         />
 
     <com.loslink.myview.SwitchButton
-        android:id="@+id/sb_my"
+    android:id="@+id/sb_my"
+    android:layout_width="220dp"
+    android:layout_height="50dp"
+    android:layout_centerHorizontal="true"
+    android:layout_marginLeft="100dp"
+    android:layout_marginStart="100dp"/>
+
+    <ImageView
+        android:id="@+id/iv_gif"
         android:layout_width="220dp"
-        android:layout_height="50dp"
+        android:layout_height="220dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginLeft="100dp"
-        android:layout_marginStart="100dp"/>
+        android:background="@color/colorAccent"
+        android:scaleType="fitCenter"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:visibility="gone"/>
+
+    <com.loslink.myview.FloatBallView
+        android:id="@+id/fv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        app:strokeWidth="2dp"
+        app:circleWidth="42dp"
+        />
 
 </android.support.constraint.ConstraintLayout>

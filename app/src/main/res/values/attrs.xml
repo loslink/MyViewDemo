@@ -25,4 +25,9 @@
         <attr name="bgEndColor" />
     </declare-styleable>
 
+    <declare-styleable name="FloatBallView">
+        <attr name="strokeWidth" format="dimension"/>
+        <attr name="circleWidth" format="dimension"/>
+    </declare-styleable>
+
 </resources>

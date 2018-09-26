@@ -9,4 +9,11 @@
 
     <color name="buttonCircleColor">#767676</color>
     <color name="buttonBaseColor">#545454</color>
+
+    <color name="floatBallCircleYellowColor">#ccf9bc5c</color>
+    <color name="floatBallCircleYellowOutColor">#f9bc5c</color>
+    <color name="floatBallCircleGreenColor">#cc24c092</color>
+    <color name="floatBallCircleGreenOutColor">#24c092</color>
+    <color name="floatBallCircleRedColor">#ccf95c5c</color>
+    <color name="floatBallCircleRedOutColor">#f95c5c</color>
 </resources>
