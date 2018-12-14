@@ -1,4 +1,4 @@
-package com.loslink.myview;
+package com.loslink.myview.widget;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -15,6 +15,8 @@ import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+
+import com.loslink.myview.R;
 
 class FloatBallView extends View {
 

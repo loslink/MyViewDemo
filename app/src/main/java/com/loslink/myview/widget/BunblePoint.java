@@ -1,4 +1,4 @@
-package com.loslink.myview;
+package com.loslink.myview.widget;
 
 import android.graphics.Bitmap;
 import android.graphics.Matrix;

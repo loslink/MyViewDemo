@@ -1,4 +1,4 @@
-package com.loslink.myview;
+package com.loslink.myview.widget;
 
 import android.content.Context;
 import android.content.res.XmlResourceParser;

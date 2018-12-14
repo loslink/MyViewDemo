@@ -1,4 +1,4 @@
-package com.loslink.myview;
+package com.loslink.myview.widget;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -25,6 +25,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
+
+import com.loslink.myview.R;
 
 import javax.xml.datatype.Duration;
 

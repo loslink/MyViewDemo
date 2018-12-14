@@ -1,4 +1,4 @@
-package com.loslink.myview;
+package com.loslink.myview.widget;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -18,6 +18,8 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
+
+import com.loslink.myview.R;
 
 class SwitchButton extends View {
 

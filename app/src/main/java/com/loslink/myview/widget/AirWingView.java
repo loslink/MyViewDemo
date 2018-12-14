@@ -1,4 +1,4 @@
-package com.loslink.myview;
+package com.loslink.myview.widget;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -11,9 +11,7 @@ import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Rect;
-import android.graphics.Region;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.Nullable;
@@ -23,6 +21,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
+
+import com.loslink.myview.AlerConstantDelerInterploator;
+import com.loslink.myview.R;
 
 import java.util.ArrayList;
 import java.util.List;

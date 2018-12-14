@@ -1,29 +1,22 @@
 package com.loslink.myview;
 
-import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.loslink.myview.R;
+import com.loslink.myview.widget.FloatBallView;
+import com.loslink.myview.widget.JunkCleanView;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -32,7 +25,7 @@ import java.util.Random;
 
 public class MyTestActivity extends Activity {
 
-    private MTextView MTextView;
+    private com.loslink.myview.widget.MTextView MTextView;
     private ImageView iv_test;
     private JunkCleanView jcv_test;
     private ImageView iv_gif;

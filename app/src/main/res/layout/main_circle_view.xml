@@ -14,7 +14,7 @@
         android:layout_height="330dp"
         android:layout_gravity="center"/>
 
-    <com.loslink.myview.RotateView
+    <com.loslink.myview.widget.RotateView
         android:id="@+id/rv_second"
         android:layout_width="330dp"
         android:layout_height="330dp"
