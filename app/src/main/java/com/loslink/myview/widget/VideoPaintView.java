@@ -26,7 +26,7 @@ public class VideoPaintView extends View {
     private Bitmap mDrawBit;
     private Paint mEraserPaint;
     private Canvas mPaintCanvas = null;
-    private boolean eraser;
+    private boolean eraser=false;
 
     private boolean isTouch = true;
     private int picWidth, picHeight;
@@ -36,7 +36,7 @@ public class VideoPaintView extends View {
     // 默认画笔为黑色
     private int currentColor = Color.BLACK;
     // 画笔的粗细
-    private int currentSize = 5;
+    private int currentSize = 5,eraserSize = 5;
     // 当前所选画笔的形状
     private MyPath curAction = null;
 
@@ -89,6 +89,8 @@ public class VideoPaintView extends View {
     }
 
     private void init(Context context) {
+
+
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
 
@@ -187,10 +189,10 @@ public class VideoPaintView extends View {
                 if(mPaintCanvas==null){
                     return false;
                 }
-                mDrawBit.eraseColor(Color.TRANSPARENT);//清空画布
-                for (BaseAction baseAction : pathList) {
-                    baseAction.draw(mPaintCanvas);
-                }
+//                mDrawBit.eraseColor(Color.TRANSPARENT);//清空画布
+//                for (BaseAction baseAction : pathList) {
+//                    baseAction.draw(mPaintCanvas);
+//                }
                 curAction.move(x, y);
                 curAction.draw(mPaintCanvas);
                 this.postInvalidate();
@@ -233,7 +235,11 @@ public class VideoPaintView extends View {
      * @param y
      */
     private void setCurAction(float x, float y) {
-        curAction = new MyPath(x, y, currentSize, currentColor);
+        if(eraser){
+            curAction = new MyPath(x, y, eraserSize, currentColor,true);
+        }else{
+            curAction = new MyPath(x, y, currentSize, currentColor,false);
+        }
     }
 
     @Override
@@ -246,7 +252,6 @@ public class VideoPaintView extends View {
 
     public void setEraser(boolean eraser) {
         this.eraser = eraser;
-        mPaint.setColor(eraser ? Color.TRANSPARENT : currentColor);
     }
 
     public Bitmap getPaintBit() {

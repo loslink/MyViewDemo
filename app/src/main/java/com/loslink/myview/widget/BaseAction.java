@@ -4,6 +4,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 
 /**
  * 动作的基础类
@@ -60,23 +62,24 @@ class MyPoint extends BaseAction {
 
     }
 }
-
 /**
  * 自由曲线
  */
 class MyPath extends BaseAction {
     private Path path;
     private int size;
+    private boolean isEraser =false;//是否橡皮擦
 
     MyPath() {
         path = new Path();
         size = 1;
     }
 
-    MyPath(float x, float y, int size, int color) {
+    MyPath(float x, float y, int size, int color,boolean isEraser) {
         super(color);
         this.path = new Path();
         this.size = size;
+        this.isEraser = isEraser;
         path.moveTo(x, y);
         path.lineTo(x, y);
     }
@@ -84,9 +87,13 @@ class MyPath extends BaseAction {
     @Override
     public void draw(Canvas canvas) {
         Paint paint = new Paint();
+        if(isEraser){
+            paint.setAlpha(0);
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
+        }
         paint.setAntiAlias(true);
         paint.setDither(true);
-        paint.setColor(color);
+        paint.setColor(isEraser ? Color.TRANSPARENT : color);
         paint.setStrokeWidth(size);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeJoin(Paint.Join.ROUND);
@@ -99,7 +106,6 @@ class MyPath extends BaseAction {
         path.lineTo(mx, my);
     }
 }
-
 /**
  * 直线
  */
