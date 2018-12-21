@@ -18,6 +18,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -39,12 +41,14 @@ public class RecyclerViewActivity extends Activity {
 
     private RecyclerView mRecyclerView;
     RecyclerListAdapter adapter;
+    RelativeLayout rl_right;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recyclerview);
         mRecyclerView = (RecyclerView)findViewById(R.id.recycler_view);
+        rl_right=findViewById(R.id.rl_right);
 
         initRecyclerView();
     }
@@ -72,7 +76,30 @@ public class RecyclerViewActivity extends Activity {
                         for(int j=0;j<count;j++){
                             View child=mRecyclerView.getChildAt(j);
                             int position=mRecyclerView.getChildAdapterPosition(child);
+
                             Log.e("mRecyclerView","index:"+j+"   position:"+position+"    bottom:"+child.getBottom());
+                            ImageView imageView = null;
+                            RelativeLayout.LayoutParams layoutParams;
+                            if(lastPosition!=position){
+                                imageView=new ImageView(RecyclerViewActivity.this);
+                                imageView.setImageResource(R.mipmap.ic_junk_ufo);
+                                layoutParams=new RelativeLayout.LayoutParams(100, 100);
+                                layoutParams.topMargin=child.getBottom();
+                                rl_right.addView(imageView,layoutParams);
+                            }else{
+                                imageView= (ImageView) rl_right.getChildAt(0);
+                                layoutParams= (RelativeLayout.LayoutParams) imageView.getLayoutParams();
+                                layoutParams.topMargin=child.getBottom();
+                                imageView.setLayoutParams(layoutParams);
+                            }
+
+                            imageView.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Toast.makeText(RecyclerViewActivity.this,"hahaha",Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            lastPosition=position;
                         }
                     }
                 });
@@ -87,6 +114,8 @@ public class RecyclerViewActivity extends Activity {
             });
         }
     }
+
+    private int lastPosition=-1;
 
     public RecyclerListAdapter onCreateAdapter() {
         return new RecyclerListAdapter() {
