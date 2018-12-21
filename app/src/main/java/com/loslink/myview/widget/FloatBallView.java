@@ -18,7 +18,7 @@ import android.view.View;
 
 import com.loslink.myview.R;
 
-class FloatBallView extends View {
+public class FloatBallView extends View {
 
     private Paint circlePaint, circleContentPaint, textPaint;
     private Context context;
@@ -95,7 +95,6 @@ class FloatBallView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-
         canvas.translate(canvasWidth / 2, canvasHeight / 2);
         if(progress>=0.7){
             circlePaint.setColor(context.getResources().getColor(R.color.floatBallCircleRedOutColor));

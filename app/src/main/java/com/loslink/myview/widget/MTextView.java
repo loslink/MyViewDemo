@@ -20,7 +20,7 @@ import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.View;
 
-class MTextView extends View {
+public class MTextView extends View {
 
     private Paint srcPaint;
     private String text="754";
