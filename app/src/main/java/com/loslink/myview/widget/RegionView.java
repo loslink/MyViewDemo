@@ -46,6 +46,10 @@ public class RegionView extends View {
         }
     }
 
+    public void setPath(String path){
+
+    }
+
     public void setBitmap(Bitmap b) {
         srcPic = b;
     }
