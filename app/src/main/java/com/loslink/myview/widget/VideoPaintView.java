@@ -21,7 +21,7 @@ import java.util.List;
  * @author loslink
  * @time 2018/12/13 18:27
  */
-public class VideoPaintView extends View { 
+public class VideoPaintView extends View {
     private Paint mPaint;
     private Bitmap mDrawBit;
     private Paint mEraserPaint;
