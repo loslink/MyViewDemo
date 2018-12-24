@@ -43,9 +43,20 @@ public class StitchImagesAdapter extends RecyclerView.Adapter {
         }
         final StitchImageInfo item = imageList.get(position);
 
-//        Glide.with(mContext).load(item.getPath())
-//                .centerCrop()
-//                .into(imagesViewHolder.iv_image);
+        if(position==0){
+            imagesViewHolder.regionView.setMode(RegionView.MODE_TOP);
+        }else if(position==imageList.size()-1){
+            imagesViewHolder.regionView.setMode(RegionView.MODE_BOTTOM);
+        }else {
+            imagesViewHolder.regionView.setMode(RegionView.MODE_NOMAL);
+        }
+
+        if(position==0 || position==1){
+            imagesViewHolder.regionView.setEdit(true);
+        }else{
+            imagesViewHolder.regionView.setEdit(false);
+        }
+        imagesViewHolder.regionView.setPath(null);
 
     }
 

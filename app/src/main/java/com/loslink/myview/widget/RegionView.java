@@ -20,13 +20,21 @@ import java.io.FileInputStream;
  * 显示图片区域
  */
 public class RegionView extends View {
+
+    public static final int MODE_NOMAL=0;
+    public static final int MODE_TOP=1;
+    public static final int MODE_BOTTOM=2;
     private Bitmap showPic,srcPic;
     private int startX = 0;
     private int startY = 0;
     private int width,height,canvasW,cavasH;
     private Context context;
-    private Paint strokePaint;
+    private Paint strokePaint,controllerPaint;
     private int strokeWidth;
+    private boolean isEdit=false;
+    private int mode=0;
+    private float controllerBarWidth;
+    private String imgPath;
 
     public RegionView(Context context) {
         this(context,null);
@@ -44,10 +52,16 @@ public class RegionView extends View {
 
     private void init(){
         strokeWidth=DipToPx.dipToPx(context,2);
+        controllerBarWidth=(float) DipToPx.dipToPx(context,30);
+
         strokePaint=new Paint(Paint.ANTI_ALIAS_FLAG);
         strokePaint.setStyle(Paint.Style.STROKE);
         strokePaint.setStrokeWidth(strokeWidth);
         strokePaint.setColor(Color.WHITE);
+
+        controllerPaint= new Paint(Paint.ANTI_ALIAS_FLAG);
+        controllerPaint.setFilterBitmap(true);
+        controllerPaint.setDither(true);
 
     }
 
@@ -56,7 +70,7 @@ public class RegionView extends View {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);//触发测量父控件canvasW
         canvasW=MeasureSpec.getSize(widthMeasureSpec);//得到父控件最大宽度
         if(canvasW>0){
-            setPath(null);
+            loadImage();
         }
 
     }
@@ -65,12 +79,64 @@ public class RegionView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         drawImage(canvas);
+        drawController(canvas);
+    }
+
+    /**
+     * 外框控制杆绘制
+     * @param canvas
+     */
+    private void drawController(Canvas canvas){
         float picW=showPic.getWidth();
         float picH=showPic.getHeight();
-        canvas.drawLine(0,strokeWidth/2,picW,strokeWidth/2,strokePaint);
+        if(isEdit){
+            strokePaint.setColor(Color.RED);
+        }else{
+            strokePaint.setColor(Color.WHITE);
+        }
+        if(mode==MODE_TOP){
+            canvas.drawLine(0,strokeWidth/2,picW,strokeWidth/2,strokePaint);
+        }
+        if(mode==MODE_BOTTOM){
+            canvas.drawLine(0,picH-strokeWidth/2,picW,picH-strokeWidth/2,strokePaint);
+        }
         canvas.drawLine(strokeWidth/2,0,strokeWidth/2,picH,strokePaint);
         canvas.drawLine(picW-strokeWidth/2,0,picW-strokeWidth/2,picH,strokePaint);
+
+        if(isEdit){
+            canvas.drawLine(0,strokeWidth/2,picW,strokeWidth/2,strokePaint);
+            canvas.drawLine(0,picH-strokeWidth/2,picW,picH-strokeWidth/2,strokePaint);
+
+            Bitmap controllerDown = BitmapFactory.decodeResource(context.getResources(),R.mipmap.ic_controller_down);
+            Bitmap controllerUp = BitmapFactory.decodeResource(context.getResources(),R.mipmap.ic_controller_up);
+            Matrix matrix = new Matrix();
+            float barHeight=controllerUp.getHeight()*(controllerBarWidth/controllerDown.getWidth());
+            matrix.setScale(controllerBarWidth/controllerDown.getWidth(),controllerBarWidth/controllerDown.getWidth());
+            matrix.postTranslate((canvasW-controllerBarWidth)/2,0);
+            canvas.drawBitmap(controllerDown,matrix,controllerPaint);
+            matrix.postTranslate(0,cavasH-barHeight);
+            canvas.drawBitmap(controllerUp,matrix,controllerPaint);
+        }
     }
+
+    public boolean isEdit() {
+        return isEdit;
+    }
+
+    public void setEdit(boolean edit) {
+        isEdit = edit;
+        postInvalidate();
+    }
+
+    public int getMode() {
+        return mode;
+    }
+
+    public void setMode(int mode) {
+        this.mode = mode;
+        postInvalidate();
+    }
+
 
     private void drawImage(Canvas canvas){
         if(startX>srcPic.getWidth()){
@@ -95,7 +161,13 @@ public class RegionView extends View {
     }
 
     public void setPath(String path){
+        imgPath=path;
+    }
 
+    private void loadImage(){
+//        if(srcPic!=null){
+//            return;
+//        }
         BitmapFactory.Options o = new BitmapFactory.Options();
         o.inJustDecodeBounds = true;
         BitmapFactory.decodeResource(getResources(),R.mipmap.girl,o);
@@ -115,14 +187,15 @@ public class RegionView extends View {
         Matrix matrix = new Matrix();
         matrix.postScale( (float) canvasW / bmp.getWidth(), (float) cavasH / bmp.getHeight() );
         Bitmap result = Bitmap.createBitmap( bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true );
-        this.width=result.getWidth();
-        this.height=result.getHeight();
+        width=result.getWidth();
+        height=result.getHeight();
         setBitmap(result);
         bmp.recycle();
     }
 
     public void setBitmap(Bitmap b) {
         srcPic = b;
+        postInvalidate();
     }
 
     public void setBitmapRegion(int startX, int startY,int width,int height) {
