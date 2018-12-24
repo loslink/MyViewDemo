@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import com.loslink.myview.R;
 import com.loslink.myview.model.StitchImageInfo;
+import com.loslink.myview.widget.RegionView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,11 +59,11 @@ public class StitchImagesAdapter extends RecyclerView.Adapter {
 
     private class ImagesViewHolder extends RecyclerView.ViewHolder {
 
-        private ImageView iv_image;
+        private RegionView regionView;
 
         public ImagesViewHolder(View view) {
             super(view);
-            iv_image = (ImageView) view.findViewById(R.id.item_image);
+            regionView = (RegionView) view.findViewById(R.id.item_image);
         }
     }
 
