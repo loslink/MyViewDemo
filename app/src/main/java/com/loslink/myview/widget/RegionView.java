@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.loslink.myview.R;
+import com.loslink.myview.model.StitchImageInfo;
 import com.loslink.myview.utils.DipToPx;
 import com.loslink.myview.utils.rx.RxTask;
 
@@ -40,7 +41,7 @@ public class RegionView extends View {
     private int startY = 0;
     private int width,height,canvasW,cavasH;
     private Context context;
-    private Paint strokePaint,controllerPaint;
+    private Paint strokePaint,controllerPaint,mBackgroundPaint;
     private int strokeWidth;
     private boolean isEdit=false;
     private int mode=0;
@@ -51,8 +52,10 @@ public class RegionView extends View {
     private int status=STATUS_NORMAL;
     private int selectedController;
     private RectF topControllerRect=new RectF(),bottomControllerRect=new RectF();
+    private RectF backUpRect=new RectF(),backDownRect=new RectF();
     private Matrix matrixDown=new Matrix(),matrixUp=new Matrix();
     private Bitmap controllerDown,controllerUp;
+    private OnRegionViewListenr onRegionViewListenr;
 
     public RegionView(Context context) {
         this(context,null);
@@ -68,6 +71,23 @@ public class RegionView extends View {
         init();
     }
 
+    public OnRegionViewListenr getOnRegionViewListenr() {
+        return onRegionViewListenr;
+    }
+
+    public void setOnRegionViewListenr(OnRegionViewListenr onRegionViewListenr) {
+        this.onRegionViewListenr = onRegionViewListenr;
+    }
+
+    public RectF getCropRectF() {
+        return cropRectF;
+    }
+
+    public void setCropRectF(RectF cropRectF) {
+        this.cropRectF = cropRectF;
+    }
+
+
     private void init(){
         strokeWidth=DipToPx.dipToPx(context,2);
         controllerBarWidth=(float) DipToPx.dipToPx(context,30);
@@ -80,6 +100,9 @@ public class RegionView extends View {
         controllerPaint= new Paint(Paint.ANTI_ALIAS_FLAG);
         controllerPaint.setFilterBitmap(true);
         controllerPaint.setDither(true);
+
+        mBackgroundPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
+        mBackgroundPaint.setColor(Color.parseColor("#88000000"));
 
         controllerDown = BitmapFactory.decodeResource(context.getResources(),R.mipmap.ic_controller_down);
         controllerUp = BitmapFactory.decodeResource(context.getResources(),R.mipmap.ic_controller_up);
@@ -115,6 +138,22 @@ public class RegionView extends View {
         super.onDraw(canvas);
         drawImage(canvas);
         drawController(canvas);
+        drawCropOutside(canvas);
+    }
+
+    /**
+     * 裁剪框外蒙层
+     * @param canvas
+     */
+    private void drawCropOutside(Canvas canvas){
+        if(srcPic==null){
+            return;
+        }
+        backUpRect.set(cropRectF.left, 0, cropRectF.right, cropRectF.top);
+        backDownRect.set(cropRectF.left, cropRectF.bottom, cropRectF.right, cavasH);
+
+        canvas.drawRect(backUpRect, mBackgroundPaint);
+        canvas.drawRect(backDownRect, mBackgroundPaint);
     }
 
     /**
@@ -233,6 +272,9 @@ public class RegionView extends View {
                     cropRectF.bottom = cavasH;
                 }
                 break;
+        }
+        if(onRegionViewListenr!=null){
+            onRegionViewListenr.onCropRect(cropRectF);
         }
         postInvalidate();
     }
@@ -380,7 +422,9 @@ public class RegionView extends View {
 
     public void setBitmap(Bitmap b) {
         srcPic = b;
-        cropRectF = new RectF(0, 0, srcPic.getWidth(), srcPic.getHeight());//裁剪框最外围坐标为裁剪真实区
+        if(cropRectF==null){
+            cropRectF = new RectF(0, 0, srcPic.getWidth(), srcPic.getHeight());//裁剪框最外围坐标为裁剪真实区
+        }
         postInvalidate();
     }
 
@@ -390,6 +434,11 @@ public class RegionView extends View {
         this.width=width;
         this.height=height;
         postInvalidate();
+    }
+
+    public interface OnRegionViewListenr{
+        void onCropRect(RectF cropRectF);
+        void onHistoryAction(RectF action);
     }
 }
 

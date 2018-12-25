@@ -11,6 +11,7 @@ public class StitchImageInfo {
     private View controllerView;
     private List<RectF> historyActions;
     private boolean isEditing=false;
+    private RectF currentCropRectF;//当前裁剪框状态
 
     public String getPath() {
         return path;
@@ -42,6 +43,14 @@ public class StitchImageInfo {
 
     public void setEditing(boolean editing) {
         isEditing = editing;
+    }
+
+    public RectF getCurrentCropRectF() {
+        return currentCropRectF;
+    }
+
+    public void setCurrentCropRectF(RectF currentCropRectF) {
+        this.currentCropRectF = currentCropRectF;
     }
 
 }

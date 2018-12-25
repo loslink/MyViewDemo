@@ -1,11 +1,12 @@
 package com.loslink.myview.utils;
 
 import android.content.Context;
+import android.graphics.RectF;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+
 import com.loslink.myview.R;
 import com.loslink.myview.model.StitchImageInfo;
 import com.loslink.myview.widget.RegionView;
@@ -59,6 +60,19 @@ public class StitchImagesAdapter extends RecyclerView.Adapter {
             imagesViewHolder.regionView.setEdit(false);
         }
         imagesViewHolder.regionView.setPath(null);
+        imagesViewHolder.regionView.setCropRectF(item.getCurrentCropRectF());
+
+        imagesViewHolder.regionView.setOnRegionViewListenr(new RegionView.OnRegionViewListenr() {
+            @Override
+            public void onCropRect(RectF cropRectF) {
+                item.setCurrentCropRectF(cropRectF);
+            }
+
+            @Override
+            public void onHistoryAction(RectF action) {
+
+            }
+        });
 
     }
 
