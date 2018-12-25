@@ -276,6 +276,9 @@ public class RegionView extends View {
         if(onRegionViewListenr!=null){
             onRegionViewListenr.onCropRect(cropRectF);
         }
+        if(cropRectF.bottom-cropRectF.top<cavasH/2){
+            cutImage();
+        }
         postInvalidate();
     }
 
@@ -428,7 +431,24 @@ public class RegionView extends View {
         postInvalidate();
     }
 
-    public void setBitmapRegion(int startX, int startY,int width,int height) {
+    /**
+     * 裁剪图片
+     */
+    public void cutImage(){
+        if(!isEdit){
+            return;
+        }
+        setBitmapRegion((int)cropRectF.left,
+                (int)cropRectF.top,
+                (int)(cropRectF.right-cropRectF.left),
+                (int)(cropRectF.bottom-cropRectF.top));
+        setMeasuredDimension(canvasW, (int)(cropRectF.bottom-cropRectF.top));
+        if(onRegionViewListenr!=null){
+            onRegionViewListenr.onHistoryAction(cropRectF);//保存裁剪记录
+        }
+    }
+
+    private void setBitmapRegion(int startX, int startY,int width,int height) {
         this.startX = startX;
         this.startY = startY;
         this.width=width;
