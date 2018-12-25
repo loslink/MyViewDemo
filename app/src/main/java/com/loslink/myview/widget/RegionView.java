@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -15,6 +16,8 @@ import com.loslink.myview.R;
 import com.loslink.myview.utils.DipToPx;
 
 import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 显示图片区域
@@ -35,6 +38,8 @@ public class RegionView extends View {
     private int mode=0;
     private float controllerBarWidth;
     private String imgPath;
+    private RectF currentRectF;
+    private List<RectF> historyList=new ArrayList<>();
 
     public RegionView(Context context) {
         this(context,null);
@@ -91,22 +96,10 @@ public class RegionView extends View {
         float picH=showPic.getHeight();
         if(isEdit){
             strokePaint.setColor(Color.RED);
-        }else{
-            strokePaint.setColor(Color.WHITE);
-        }
-        if(mode==MODE_TOP){
-            canvas.drawLine(0,strokeWidth/2,picW,strokeWidth/2,strokePaint);
-        }
-        if(mode==MODE_BOTTOM){
-            canvas.drawLine(0,picH-strokeWidth/2,picW,picH-strokeWidth/2,strokePaint);
-        }
-        canvas.drawLine(strokeWidth/2,0,strokeWidth/2,picH,strokePaint);
-        canvas.drawLine(picW-strokeWidth/2,0,picW-strokeWidth/2,picH,strokePaint);
+            canvas.drawLine(0,strokeWidth/2,picW,strokeWidth/2,strokePaint);//top
+            canvas.drawLine(0,picH-strokeWidth/2,picW,picH-strokeWidth/2,strokePaint);//bottom
 
-        if(isEdit){
-            canvas.drawLine(0,strokeWidth/2,picW,strokeWidth/2,strokePaint);
-            canvas.drawLine(0,picH-strokeWidth/2,picW,picH-strokeWidth/2,strokePaint);
-
+            //控制杆
             Bitmap controllerDown = BitmapFactory.decodeResource(context.getResources(),R.mipmap.ic_controller_down);
             Bitmap controllerUp = BitmapFactory.decodeResource(context.getResources(),R.mipmap.ic_controller_up);
             Matrix matrix = new Matrix();
@@ -116,7 +109,19 @@ public class RegionView extends View {
             canvas.drawBitmap(controllerDown,matrix,controllerPaint);
             matrix.postTranslate(0,cavasH-barHeight);
             canvas.drawBitmap(controllerUp,matrix,controllerPaint);
+        }else{
+            strokePaint.setColor(Color.WHITE);
+            if(mode==MODE_TOP){
+                canvas.drawLine(0,strokeWidth/2,picW,strokeWidth/2,strokePaint);
+            }
+            if(mode==MODE_BOTTOM){
+                canvas.drawLine(0,picH-strokeWidth/2,picW,picH-strokeWidth/2,strokePaint);
+            }
         }
+
+        canvas.drawLine(strokeWidth/2,0,strokeWidth/2,picH,strokePaint);//左线
+        canvas.drawLine(picW-strokeWidth/2,0,picW-strokeWidth/2,picH,strokePaint);//右线
+
     }
 
     public boolean isEdit() {

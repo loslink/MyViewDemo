@@ -66,6 +66,14 @@ public class StitchImagesView extends FrameLayout {
                     refreshControllerView();
                 }
             });
+
+            mRecyclerView.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    refreshControllerView();
+                }
+            },300);
+
         }
     }
 
