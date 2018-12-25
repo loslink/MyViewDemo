@@ -19,6 +19,8 @@ public class StitchImagesAdapter extends RecyclerView.Adapter {
 
     private Context mContext;
     private List<StitchImageInfo> imageList = new ArrayList<>();//全部图片
+    private int editIndex = -1;//编辑的开始项下标，共两个编辑项，下一个为：editIndex+1
+    private boolean isEdit = false;
 
     public StitchImagesAdapter(Context context,List<StitchImageInfo> list) {
         mContext = context;
@@ -51,7 +53,7 @@ public class StitchImagesAdapter extends RecyclerView.Adapter {
             imagesViewHolder.regionView.setMode(RegionView.MODE_NOMAL);
         }
 
-        if(position==0 || position==1){
+        if(editIndex>=0 && (position==editIndex || position==editIndex+1)){
             imagesViewHolder.regionView.setEdit(true);
         }else{
             imagesViewHolder.regionView.setEdit(false);
@@ -60,6 +62,24 @@ public class StitchImagesAdapter extends RecyclerView.Adapter {
 
     }
 
+    public int getEditIndex() {
+        return editIndex;
+    }
+
+    public void setEditIndex(int editIndex) {
+        this.editIndex = editIndex;
+    }
+
+    public boolean isEdit() {
+        return isEdit;
+    }
+
+    public void setEdit(boolean edit) {
+        isEdit = edit;
+        if(!isEdit){
+            editIndex=-1;
+        }
+    }
 
 
     @Override

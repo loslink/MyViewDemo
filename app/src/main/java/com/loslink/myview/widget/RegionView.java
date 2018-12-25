@@ -10,13 +10,19 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.loslink.myview.R;
 import com.loslink.myview.utils.DipToPx;
+import com.loslink.myview.utils.rx.RxTask;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -27,6 +33,8 @@ public class RegionView extends View {
     public static final int MODE_NOMAL=0;
     public static final int MODE_TOP=1;
     public static final int MODE_BOTTOM=2;
+    private static final int STATUS_NORMAL = 0;
+    private static final int STATUS_SCALE = 1;
     private Bitmap showPic,srcPic;
     private int startX = 0;
     private int startY = 0;
@@ -36,10 +44,15 @@ public class RegionView extends View {
     private int strokeWidth;
     private boolean isEdit=false;
     private int mode=0;
-    private float controllerBarWidth;
+    private float controllerBarWidth,controllerBarHeight;
     private String imgPath;
-    private RectF currentRectF;
+    private RectF cropRectF;
     private List<RectF> historyList=new ArrayList<>();
+    private int status=STATUS_NORMAL;
+    private int selectedController;
+    private RectF topControllerRect=new RectF(),bottomControllerRect=new RectF();
+    private Matrix matrixDown=new Matrix(),matrixUp=new Matrix();
+    private Bitmap controllerDown,controllerUp;
 
     public RegionView(Context context) {
         this(context,null);
@@ -68,16 +81,33 @@ public class RegionView extends View {
         controllerPaint.setFilterBitmap(true);
         controllerPaint.setDither(true);
 
+        controllerDown = BitmapFactory.decodeResource(context.getResources(),R.mipmap.ic_controller_down);
+        controllerUp = BitmapFactory.decodeResource(context.getResources(),R.mipmap.ic_controller_up);
+        controllerBarHeight=controllerDown.getHeight()*(controllerBarWidth/controllerDown.getWidth());
+
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {//第一次为0？
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);//触发测量父控件canvasW
         canvasW=MeasureSpec.getSize(widthMeasureSpec);//得到父控件最大宽度
-        if(canvasW>0){
-            loadImage();
-        }
 
+        if(canvasW>0){
+            loadImage();//由图片来确定宽高
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if(srcPic!=null && !srcPic.isRecycled()){
+            srcPic.recycle();
+            srcPic=null;
+        }
+        if(showPic!=null && !showPic.isRecycled()){
+            showPic.recycle();
+            showPic=null;
+        }
     }
 
     @Override
@@ -92,36 +122,127 @@ public class RegionView extends View {
      * @param canvas
      */
     private void drawController(Canvas canvas){
-        float picW=showPic.getWidth();
-        float picH=showPic.getHeight();
+
+        if(srcPic==null){
+            return;
+        }
         if(isEdit){
             strokePaint.setColor(Color.RED);
-            canvas.drawLine(0,strokeWidth/2,picW,strokeWidth/2,strokePaint);//top
-            canvas.drawLine(0,picH-strokeWidth/2,picW,picH-strokeWidth/2,strokePaint);//bottom
+            canvas.drawLine(cropRectF.left,cropRectF.top+strokeWidth/2,cropRectF.right,cropRectF.top+strokeWidth/2,strokePaint);//top
+            canvas.drawLine(cropRectF.left,cropRectF.bottom-strokeWidth/2,cropRectF.right,cropRectF.bottom-strokeWidth/2,strokePaint);//bottom
 
             //控制杆
-            Bitmap controllerDown = BitmapFactory.decodeResource(context.getResources(),R.mipmap.ic_controller_down);
-            Bitmap controllerUp = BitmapFactory.decodeResource(context.getResources(),R.mipmap.ic_controller_up);
-            Matrix matrix = new Matrix();
-            float barHeight=controllerUp.getHeight()*(controllerBarWidth/controllerDown.getWidth());
-            matrix.setScale(controllerBarWidth/controllerDown.getWidth(),controllerBarWidth/controllerDown.getWidth());
-            matrix.postTranslate((canvasW-controllerBarWidth)/2,0);
-            canvas.drawBitmap(controllerDown,matrix,controllerPaint);
-            matrix.postTranslate(0,cavasH-barHeight);
-            canvas.drawBitmap(controllerUp,matrix,controllerPaint);
+            topControllerRect.set((cropRectF.right-controllerBarWidth)/2,
+                    cropRectF.top,
+                    (cropRectF.right-controllerBarWidth)/2+controllerBarWidth,
+                    cropRectF.top+controllerBarHeight);
+            float sx=controllerBarWidth/controllerDown.getWidth();
+            float sy=controllerBarWidth/controllerDown.getWidth();
+            matrixDown.setScale(sx,sy);
+            matrixDown.postTranslate(topControllerRect.left,topControllerRect.top);
+            canvas.drawBitmap(controllerDown,matrixDown,controllerPaint);
+
+            bottomControllerRect.set((cropRectF.right-controllerBarWidth)/2,
+                    cropRectF.bottom-controllerBarHeight,
+                    (cropRectF.right-controllerBarWidth)/2+controllerBarWidth,
+                    cropRectF.bottom);
+            matrixUp.setScale(sx,sy);
+            matrixUp.postTranslate(bottomControllerRect.left,bottomControllerRect.top);
+            canvas.drawBitmap(controllerUp,matrixUp,controllerPaint);
         }else{
             strokePaint.setColor(Color.WHITE);
             if(mode==MODE_TOP){
-                canvas.drawLine(0,strokeWidth/2,picW,strokeWidth/2,strokePaint);
+                canvas.drawLine(cropRectF.left,cropRectF.top+strokeWidth/2,cropRectF.right,cropRectF.top+strokeWidth/2,strokePaint);//top
             }
             if(mode==MODE_BOTTOM){
-                canvas.drawLine(0,picH-strokeWidth/2,picW,picH-strokeWidth/2,strokePaint);
+                canvas.drawLine(cropRectF.left,cropRectF.bottom-strokeWidth/2,cropRectF.right,cropRectF.bottom-strokeWidth/2,strokePaint);//bottom
             }
         }
 
-        canvas.drawLine(strokeWidth/2,0,strokeWidth/2,picH,strokePaint);//左线
-        canvas.drawLine(picW-strokeWidth/2,0,picW-strokeWidth/2,picH,strokePaint);//右线
+        canvas.drawLine(cropRectF.left+strokeWidth/2,cropRectF.top,cropRectF.left+strokeWidth/2,cropRectF.bottom,strokePaint);//左线
+        canvas.drawLine(cropRectF.right-strokeWidth/2,cropRectF.top,cropRectF.right-strokeWidth/2,cropRectF.bottom,strokePaint);//右线
 
+    }
+
+    /**
+     * 触摸事件处理
+     */
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if(!isEdit){
+            return false;
+        }
+        this.getParent().requestDisallowInterceptTouchEvent(true);
+        boolean ret = super.onTouchEvent(event);// 是否向下传递事件标志 true为消耗
+        int action = event.getAction();
+        float x = event.getX();
+        float y = event.getY();
+        switch (action & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_DOWN:
+                int selectController = isSeletedControllerCircle(x, y);
+                if (selectController > 0) {// 选择控制点
+                    ret = true;
+                    selectedController = selectController;// 记录选中控制点编号
+                    status = STATUS_SCALE;// 进入缩放状态
+                }else{
+                    status = STATUS_NORMAL;
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (status == STATUS_SCALE) {// 缩放控制
+                    scaleCropController(x, y);
+                    ret = true;
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                status = STATUS_NORMAL;
+                break;
+        }
+        return ret;
+    }
+
+    /**
+     * 操作控制点 控制缩放
+     *
+     * @param x
+     * @param y
+     */
+    private void scaleCropController(float x, float y) {
+//        tempRect.set(cropRect);// 存贮原有数据，以便还原
+        switch (selectedController) {
+            case 1:// 选中顶部控制点
+                if(y>0){
+                    if(y>cropRectF.bottom-controllerBarHeight*2){
+                        cropRectF.top = cropRectF.bottom-controllerBarHeight*2;
+                    }else{
+                        cropRectF.top = y;
+                    }
+                }else{
+                    cropRectF.top = 0;
+                }
+                break;
+            case 2:// 选中底部控制点
+                if(y<cavasH){
+                    if(y<cropRectF.top+controllerBarHeight*2){
+                        cropRectF.bottom = cropRectF.top+controllerBarHeight*2;
+                    }else{
+                        cropRectF.bottom = y;
+                    }
+                }else{
+                    cropRectF.bottom = cavasH;
+                }
+                break;
+        }
+        postInvalidate();
+    }
+
+    private int isSeletedControllerCircle(float x, float y) {
+        if (topControllerRect.contains(x, y))// 选中顶部控制点
+            return 1;
+        if (bottomControllerRect.contains(x, y))// 选中底部控制点
+            return 2;
+        return -1;
     }
 
     public boolean isEdit() {
@@ -144,6 +265,10 @@ public class RegionView extends View {
 
 
     private void drawImage(Canvas canvas){
+
+        if(srcPic==null){
+            return;
+        }
         if(startX>srcPic.getWidth()){
             startX=srcPic.getWidth();
         }
@@ -163,43 +288,99 @@ public class RegionView extends View {
         if(showPic!=null){
             canvas.drawBitmap(showPic, 0, 0, null);
         }
+
     }
 
     public void setPath(String path){
         imgPath=path;
     }
 
-    private void loadImage(){
-//        if(srcPic!=null){
-//            return;
+    /**
+     * 同步加载图片
+     */
+//    private void loadImage(){
+//        BitmapFactory.Options o = new BitmapFactory.Options();
+//        o.inJustDecodeBounds = true;
+//        BitmapFactory.decodeResource(getResources(),R.mipmap.girl,o);
+//        int scale = 1;
+//        int IMAGE_MAX_SIZE=canvasW;
+//        if (o.outHeight > IMAGE_MAX_SIZE || o.outWidth > IMAGE_MAX_SIZE) {
+//            scale = (int) Math.pow(2, (int) Math.round(Math.log(IMAGE_MAX_SIZE / (double) Math.max(o.outHeight, o.outWidth)) / Math.log(0.5)));
 //        }
-        BitmapFactory.Options o = new BitmapFactory.Options();
-        o.inJustDecodeBounds = true;
-        BitmapFactory.decodeResource(getResources(),R.mipmap.girl,o);
-        int scale = 1;
-        int IMAGE_MAX_SIZE=canvasW;
-        if (o.outHeight > IMAGE_MAX_SIZE || o.outWidth > IMAGE_MAX_SIZE) {
-            scale = (int) Math.pow(2, (int) Math.round(Math.log(IMAGE_MAX_SIZE / (double) Math.max(o.outHeight, o.outWidth)) / Math.log(0.5)));
+//
+//        cavasH=(int)(canvasW*((float)o.outHeight/o.outWidth));
+//        setMeasuredDimension(canvasW, cavasH);//传递给父控件,父控件大小
+//        BitmapFactory.Options options = new BitmapFactory.Options();
+//        options.inSampleSize = scale;
+//        Bitmap bmp = BitmapFactory.decodeResource(getResources(),R.mipmap.girl,options);
+//
+//        Matrix matrix = new Matrix();
+//        matrix.postScale( (float) canvasW / bmp.getWidth(), (float) cavasH / bmp.getHeight() );
+//        Bitmap result = Bitmap.createBitmap( bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true );
+//        width=result.getWidth();
+//        height=result.getHeight();
+//        setBitmap(result);
+//        bmp.recycle();
+//    }
+
+    /**
+     * 异步加载图片
+     */
+    private void loadImage(){
+
+        final BitmapFactory.Options optionsOut = new BitmapFactory.Options();
+        optionsOut.inJustDecodeBounds = true;
+        BitmapFactory.decodeResource(getResources(),R.mipmap.girl,optionsOut);
+        cavasH=(int)(canvasW*((float)optionsOut.outHeight/optionsOut.outWidth));
+        setMeasuredDimension(canvasW, cavasH);//传递给父控件,父控件大小(注意：在measure中先确定大小)
+
+        if(srcPic!=null){
+            return;
         }
 
-        cavasH=(int)(canvasW*((float)o.outHeight/o.outWidth));
-        setMeasuredDimension(canvasW, cavasH);//传递给父控件,父控件大小
+        RxTask<Integer, Void, Bitmap> rxTask = new RxTask<Integer, Void, Bitmap>() {
 
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = scale;
-        Bitmap bmp = BitmapFactory.decodeResource(getResources(),R.mipmap.girl,options);
+            @Override
+            protected Bitmap doInBackground(Integer... integers) {
+                int scale = 1;
+                int IMAGE_MAX_SIZE=canvasW;
+                if (optionsOut.outHeight > IMAGE_MAX_SIZE || optionsOut.outWidth > IMAGE_MAX_SIZE) {
+                    scale = (int) Math.pow(2, (int) Math.round(Math.log(IMAGE_MAX_SIZE / (double) Math.max(optionsOut.outHeight, optionsOut.outWidth)) / Math.log(0.5)));
+                }
 
-        Matrix matrix = new Matrix();
-        matrix.postScale( (float) canvasW / bmp.getWidth(), (float) cavasH / bmp.getHeight() );
-        Bitmap result = Bitmap.createBitmap( bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true );
-        width=result.getWidth();
-        height=result.getHeight();
-        setBitmap(result);
-        bmp.recycle();
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inSampleSize = scale;
+                Bitmap bmp = BitmapFactory.decodeResource(getResources(),R.mipmap.girl,options);
+
+                Matrix matrix = new Matrix();
+                matrix.postScale( (float) canvasW / bmp.getWidth(), (float) cavasH / bmp.getHeight() );
+                Bitmap result = Bitmap.createBitmap( bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true );
+
+                bmp.recycle();
+                return result;
+            }
+
+            @Override
+            protected void onError(Throwable throwable) {
+                super.onError(throwable);
+                Log.e("RegionView","onError:");
+            }
+
+            @Override
+            protected void onPostExecute(Bitmap result) {
+                if (result != null) {
+                    width=result.getWidth();
+                    height=result.getHeight();
+                    setBitmap(result);
+                }
+            }
+        };
+        rxTask.execute();
     }
 
     public void setBitmap(Bitmap b) {
         srcPic = b;
+        cropRectF = new RectF(0, 0, srcPic.getWidth(), srcPic.getHeight());//裁剪框最外围坐标为裁剪真实区
         postInvalidate();
     }
 

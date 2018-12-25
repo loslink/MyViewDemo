@@ -73,7 +73,6 @@ public class StitchImagesView extends FrameLayout {
                     refreshControllerView();
                 }
             },300);
-
         }
     }
 
@@ -99,6 +98,10 @@ public class StitchImagesView extends FrameLayout {
             View view = null;
             RelativeLayout.LayoutParams layoutParams;
 
+            if(position==adapter.getDatas().size()-1){//最后一项不需要添加
+                return;
+            }
+
             if(adapter.getDatas().get(position).getControllerView()!=null){
                 view= adapter.getDatas().get(position).getControllerView();
                 layoutParams= (RelativeLayout.LayoutParams) view.getLayoutParams();
@@ -113,11 +116,13 @@ public class StitchImagesView extends FrameLayout {
                 view.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Toast.makeText(context,"position: "+position,Toast.LENGTH_SHORT).show();
+                        adapter.setEditIndex(position);
+                        adapter.setEdit(true);
+                        adapter.notifyDataSetChanged();
                     }
                 });
             }
-            Log.e("mRecyclerView","index:"+j+"   position:"+position+"    bottom:"+child.getBottom());
+//            Log.e("mRecyclerView","index:"+j+"   position:"+position+"    bottom:"+child.getBottom());
 
         }
     }
