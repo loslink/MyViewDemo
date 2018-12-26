@@ -12,6 +12,7 @@ public class StitchImageInfo {
     private List<RectF> historyActions;
     private boolean isEditing=false;
     private RectF currentCropRectF;//当前裁剪框状态
+    private boolean toCut=false;//是否执行剪裁
 
     public String getPath() {
         return path;
@@ -51,6 +52,14 @@ public class StitchImageInfo {
 
     public void setCurrentCropRectF(RectF currentCropRectF) {
         this.currentCropRectF = currentCropRectF;
+    }
+
+    public boolean isToCut() {
+        return toCut;
+    }
+
+    public void setToCut(boolean toCut) {
+        this.toCut = toCut;
     }
 
 }

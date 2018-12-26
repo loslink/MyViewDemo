@@ -73,6 +73,7 @@ public class StitchImagesView extends FrameLayout {
                     refreshControllerView();
                 }
             },300);
+            adapter.setRecyclerView(mRecyclerView);
         }
     }
 
@@ -101,9 +102,9 @@ public class StitchImagesView extends FrameLayout {
             if(position==adapter.getDatas().size()-1){//最后一项不需要添加
                 return;
             }
-
-            if(adapter.getDatas().get(position).getControllerView()!=null){
-                view= adapter.getDatas().get(position).getControllerView();
+            final StitchImageInfo stitchImageInfo=adapter.getDatas().get(position);
+            if(stitchImageInfo.getControllerView()!=null){
+                view= stitchImageInfo.getControllerView();
                 layoutParams= (RelativeLayout.LayoutParams) view.getLayoutParams();
                 layoutParams.topMargin=child.getBottom()-DipToPx.dipToPx(context,15);
                 view.setLayoutParams(layoutParams);
@@ -112,12 +113,20 @@ public class StitchImagesView extends FrameLayout {
                 layoutParams=new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 layoutParams.topMargin=child.getBottom()-DipToPx.dipToPx(context,15);
                 rl_right.addView(view,layoutParams);
-                adapter.getDatas().get(position).setControllerView(view);
+                stitchImageInfo.setControllerView(view);
                 view.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        adapter.setEditIndex(position);
-                        adapter.setEdit(true);
+                        StitchImageInfo nextInfo=adapter.getDatas().get(position+1);
+                        if(stitchImageInfo.isEditing() && nextInfo.isEditing()){
+                            stitchImageInfo.setToCut(true);
+                            nextInfo.setToCut(true);
+                        }else {
+                            adapter.setAllNotCut();
+                            adapter.setEditIndex(position);
+                            adapter.setEdit(true);
+                        }
+
                         adapter.notifyDataSetChanged();
                     }
                 });

@@ -23,6 +23,16 @@ public class StitchImagesAdapter extends RecyclerView.Adapter {
     private int editIndex = -1;//编辑的开始项下标，共两个编辑项，下一个为：editIndex+1
     private boolean isEdit = false;
 
+    public RecyclerView getRecyclerView() {
+        return recyclerView;
+    }
+
+    public void setRecyclerView(RecyclerView recyclerView) {
+        this.recyclerView = recyclerView;
+    }
+
+    private RecyclerView recyclerView;
+
     public StitchImagesAdapter(Context context,List<StitchImageInfo> list) {
         mContext = context;
         imageList=list;
@@ -56,11 +66,16 @@ public class StitchImagesAdapter extends RecyclerView.Adapter {
 
         if(editIndex>=0 && (position==editIndex || position==editIndex+1)){
             imagesViewHolder.regionView.setEdit(true);
+            item.setEditing(true);
         }else{
             imagesViewHolder.regionView.setEdit(false);
+            item.setEditing(false);
         }
-        imagesViewHolder.regionView.setPath(null);
+        imagesViewHolder.regionView.setPath("position:"+position);
+
         imagesViewHolder.regionView.setCropRectF(item.getCurrentCropRectF());
+
+        imagesViewHolder.regionView.setHistoryActions(item.getHistoryActions());
 
         imagesViewHolder.regionView.setOnRegionViewListenr(new RegionView.OnRegionViewListenr() {
             @Override
@@ -69,11 +84,31 @@ public class StitchImagesAdapter extends RecyclerView.Adapter {
             }
 
             @Override
-            public void onHistoryAction(RectF action) {
-
+            public void onHistoryAction(List<RectF> historyActions) {
+                item.setHistoryActions(historyActions);
+                notifyData(recyclerView,position);
             }
         });
 
+        if(item.isToCut()){//最后才剪裁
+            item.setToCut(false);
+            imagesViewHolder.regionView.cutImage();
+        }
+
+    }
+
+    public void notifyData(final RecyclerView recyclerView, final int position) {
+        if (recyclerView.isComputingLayout()) {
+            // 延时递归处理。
+            recyclerView.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    notifyData(recyclerView,position);
+                }
+            },100);
+        } else {
+            notifyItemChanged(position);
+        }
     }
 
     public int getEditIndex() {
@@ -82,6 +117,15 @@ public class StitchImagesAdapter extends RecyclerView.Adapter {
 
     public void setEditIndex(int editIndex) {
         this.editIndex = editIndex;
+    }
+
+    /**
+     * 把所有项设置为非剪裁模式
+     */
+    public void setAllNotCut() {
+        for(int i=0;i<imageList.size();i++){
+            imageList.get(i).setToCut(false);
+        }
     }
 
     public boolean isEdit() {
