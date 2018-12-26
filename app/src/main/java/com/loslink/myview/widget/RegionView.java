@@ -85,6 +85,10 @@ public class RegionView extends View {
         return cropRectF;
     }
 
+    /**
+     * 设置裁剪框
+     * @param cropRectF
+     */
     public void setCropRectF(RectF cropRectF) {
         if(cropRectF!=null){
             this.cropRectF = cropRectF;
@@ -127,6 +131,10 @@ public class RegionView extends View {
         return historyActions;
     }
 
+    /**
+     * 设置历史动作
+     * @param historyActions
+     */
     public void setHistoryActions(List<RectF> historyActions) {
         if(historyActions!=null){
             this.historyActions = historyActions;
@@ -139,7 +147,7 @@ public class RegionView extends View {
 
     private void init(){
         strokeWidth=DipToPx.dipToPx(context,2);
-        controllerBarWidth=(float) DipToPx.dipToPx(context,30);
+        controllerBarWidth=(float) DipToPx.dipToPx(context,42);
 
         strokePaint=new Paint(Paint.ANTI_ALIAS_FLAG);
         strokePaint.setStyle(Paint.Style.STROKE);
@@ -328,6 +336,12 @@ public class RegionView extends View {
         postInvalidate();
     }
 
+    /**
+     * 判断触摸控制条
+     * @param x
+     * @param y
+     * @return
+     */
     private int isSeletedControllerCircle(float x, float y) {
         if (topControllerRect.contains(x, y))// 选中顶部控制点
             return 1;
@@ -436,7 +450,6 @@ public class RegionView extends View {
         }
         setMeasuredDimension(canvasW, cavasH);//传递给父控件,父控件大小(注意：在measure中先确定大小)
 
-//        Log.e("RegionView",imgPath+" startY:"+startY+" height:"+height);
         if(srcPic!=null){
             return;
         }
