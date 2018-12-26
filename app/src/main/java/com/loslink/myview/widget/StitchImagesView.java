@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -114,9 +115,10 @@ public class StitchImagesView extends FrameLayout {
                 layoutParams.topMargin=child.getBottom()-DipToPx.dipToPx(context,15);
                 rl_right.addView(view,layoutParams);
                 stitchImageInfo.setControllerView(view);
+                final View finalView = view;
                 view.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(View view) {
+                    public void onClick(View view2) {
                         StitchImageInfo nextInfo=adapter.getDatas().get(position+1);
                         if(stitchImageInfo.isEditing() && nextInfo.isEditing()){
                             stitchImageInfo.setToCut(true);
@@ -125,16 +127,29 @@ public class StitchImagesView extends FrameLayout {
                             adapter.setAllNotCut();
                             adapter.setEditIndex(position);
                             adapter.setEdit(true);
+                            stitchImageInfo.setEditing(true);
+                            nextInfo.setEditing(true);
+                            setControllerViewBg(stitchImageInfo, finalView,position);
                         }
-
                         adapter.notifyDataSetChanged();
                     }
                 });
             }
+            setControllerViewBg(stitchImageInfo,view,position);
 //            Log.e("mRecyclerView","index:"+j+"   position:"+position+"    bottom:"+child.getBottom());
-
         }
     }
 
+    private void setControllerViewBg(StitchImageInfo info,View view,int position){
+        ImageView iv_left=view.findViewById(R.id.iv_left);
+        ImageView iv_right=view.findViewById(R.id.iv_right);
+        if(info.isEditing() && position != adapter.getEditIndex()+1){
+            iv_left.setBackgroundResource(R.mipmap.ic_stitch_yes);
+            iv_right.setBackgroundResource(R.mipmap.ic_stitch_no);
+        }else{
+            iv_left.setBackgroundResource(R.mipmap.ic_stitch_cut);
+            iv_right.setBackgroundResource(R.mipmap.ic_stitch_reset);
+        }
+    }
 
 }
