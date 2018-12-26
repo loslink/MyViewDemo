@@ -128,6 +128,15 @@ public class StitchImagesAdapter extends RecyclerView.Adapter {
         }
     }
 
+    /**
+     * 把所有项设置为非编辑中模式
+     */
+    public void setAllNotEditting() {
+        for(int i=0;i<imageList.size();i++){
+            imageList.get(i).setEditing(false);
+        }
+    }
+
     public boolean isEdit() {
         return isEdit;
     }

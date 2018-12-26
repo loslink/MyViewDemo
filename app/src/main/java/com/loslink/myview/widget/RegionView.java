@@ -506,9 +506,9 @@ public class RegionView extends View {
      * 裁剪图片
      */
     public void cutImage(){
-        if(!isEdit){
-            return;
-        }
+//        if(!isEdit){
+//            return;
+//        }
         if(cropRectF==null || (cropRectF.left==0 && cropRectF.top==0 && cropRectF.right==0 && cropRectF.bottom==0)){//另一个不进行裁剪时
             return;
         }

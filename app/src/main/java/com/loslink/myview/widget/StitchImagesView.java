@@ -115,29 +115,83 @@ public class StitchImagesView extends FrameLayout {
                 layoutParams.topMargin=child.getBottom()-DipToPx.dipToPx(context,15);
                 rl_right.addView(view,layoutParams);
                 stitchImageInfo.setControllerView(view);
-                final View finalView = view;
-                view.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view2) {
-                        StitchImageInfo nextInfo=adapter.getDatas().get(position+1);
-                        if(stitchImageInfo.isEditing() && nextInfo.isEditing()){
-                            stitchImageInfo.setToCut(true);
-                            nextInfo.setToCut(true);
-                        }else {
-                            adapter.setAllNotCut();
-                            adapter.setEditIndex(position);
-                            adapter.setEdit(true);
-                            stitchImageInfo.setEditing(true);
-                            nextInfo.setEditing(true);
-                            setControllerViewBg(stitchImageInfo, finalView,position);
-                        }
-                        adapter.notifyDataSetChanged();
-                    }
-                });
+                setControllerLister(stitchImageInfo,view,position);
+//                view.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View view2) {
+//                        StitchImageInfo nextInfo=adapter.getDatas().get(position+1);
+//                        if(stitchImageInfo.isEditing() && nextInfo.isEditing()){
+//                            stitchImageInfo.setToCut(true);
+//                            nextInfo.setToCut(true);
+//                            stitchImageInfo.setEditing(false);
+//                            nextInfo.setEditing(false);
+//                            refreshControllerView();
+//                        }else {
+//                            adapter.setAllNotCut();
+//                            adapter.setAllNotEditting();
+//                            adapter.setEditIndex(position);
+//                            adapter.setEdit(true);
+//                            stitchImageInfo.setEditing(true);
+//                            nextInfo.setEditing(true);
+//                            refreshControllerView();
+//                        }
+//                        adapter.notifyDataSetChanged();
+//                    }
+//                });
+
+
             }
             setControllerViewBg(stitchImageInfo,view,position);
 //            Log.e("mRecyclerView","index:"+j+"   position:"+position+"    bottom:"+child.getBottom());
         }
+    }
+
+    /**
+     * 设置控制杆的监听
+     * @param stitchImageInfo
+     * @param controllerView
+     * @param editIndex
+     */
+    private void setControllerLister(final StitchImageInfo stitchImageInfo, View controllerView, final int editIndex){
+        ImageView iv_left=controllerView.findViewById(R.id.iv_left);
+        ImageView iv_right=controllerView.findViewById(R.id.iv_right);
+        final StitchImageInfo nextInfo=adapter.getDatas().get(editIndex+1);
+        iv_left.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view2) {
+                if(stitchImageInfo.isEditing() && nextInfo.isEditing()){
+                    stitchImageInfo.setToCut(true);
+                    nextInfo.setToCut(true);
+                    stitchImageInfo.setEditing(false);
+                    nextInfo.setEditing(false);
+                    adapter.setEditIndex(-1);
+                    refreshControllerView();
+                }else {
+                    adapter.setAllNotCut();
+                    adapter.setAllNotEditting();
+                    adapter.setEditIndex(editIndex);
+                    adapter.setEdit(true);
+                    stitchImageInfo.setEditing(true);
+                    nextInfo.setEditing(true);
+                    refreshControllerView();
+                }
+                adapter.notifyDataSetChanged();
+            }
+        });
+
+        iv_right.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(stitchImageInfo.isEditing() && nextInfo.isEditing()){//正在编辑的控制杆
+                    adapter.setAllNotCut();
+                    stitchImageInfo.setEditing(false);
+                    nextInfo.setEditing(false);
+                    adapter.setEditIndex(-1);
+                    refreshControllerView();
+                }
+                adapter.notifyDataSetChanged();
+            }
+        });
     }
 
     private void setControllerViewBg(StitchImageInfo info,View view,int position){
