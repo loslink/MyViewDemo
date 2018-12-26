@@ -103,6 +103,9 @@ public class StitchImagesView extends FrameLayout {
             if(position==adapter.getDatas().size()-1){//最后一项不需要添加
                 return;
             }
+            if(position<0 || position > adapter.getDatas().size()-1){
+                return;
+            }
             final StitchImageInfo stitchImageInfo=adapter.getDatas().get(position);
             if(stitchImageInfo.getControllerView()!=null){
                 view= stitchImageInfo.getControllerView();
@@ -116,30 +119,6 @@ public class StitchImagesView extends FrameLayout {
                 rl_right.addView(view,layoutParams);
                 stitchImageInfo.setControllerView(view);
                 setControllerLister(stitchImageInfo,view,position);
-//                view.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View view2) {
-//                        StitchImageInfo nextInfo=adapter.getDatas().get(position+1);
-//                        if(stitchImageInfo.isEditing() && nextInfo.isEditing()){
-//                            stitchImageInfo.setToCut(true);
-//                            nextInfo.setToCut(true);
-//                            stitchImageInfo.setEditing(false);
-//                            nextInfo.setEditing(false);
-//                            refreshControllerView();
-//                        }else {
-//                            adapter.setAllNotCut();
-//                            adapter.setAllNotEditting();
-//                            adapter.setEditIndex(position);
-//                            adapter.setEdit(true);
-//                            stitchImageInfo.setEditing(true);
-//                            nextInfo.setEditing(true);
-//                            refreshControllerView();
-//                        }
-//                        adapter.notifyDataSetChanged();
-//                    }
-//                });
-
-
             }
             setControllerViewBg(stitchImageInfo,view,position);
 //            Log.e("mRecyclerView","index:"+j+"   position:"+position+"    bottom:"+child.getBottom());
