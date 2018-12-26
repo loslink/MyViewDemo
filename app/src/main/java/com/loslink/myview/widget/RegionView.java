@@ -203,7 +203,7 @@ public class RegionView extends View {
      * @param canvas
      */
     private void drawCropOutside(Canvas canvas){
-        if(srcPic==null){
+        if(srcPic==null || !isEdit){
             return;
         }
         backUpRect.set(getCurrentCanvasCrop().left, 0, getCurrentCanvasCrop().right, getCurrentCanvasCrop().top);
@@ -245,18 +245,24 @@ public class RegionView extends View {
             matrixUp.setScale(sx,sy);
             matrixUp.postTranslate(bottomControllerRect.left,bottomControllerRect.top);
             canvas.drawBitmap(controllerUp,matrixUp,controllerPaint);
+
+            canvas.drawLine(getCurrentCanvasCrop().left+strokeWidth/2,getCurrentCanvasCrop().top,getCurrentCanvasCrop().left+strokeWidth/2,getCurrentCanvasCrop().bottom,strokePaint);//左线
+            canvas.drawLine(getCurrentCanvasCrop().right-strokeWidth/2,getCurrentCanvasCrop().top,getCurrentCanvasCrop().right-strokeWidth/2,getCurrentCanvasCrop().bottom,strokePaint);//右线
+
         }else{
             strokePaint.setColor(Color.WHITE);
             if(mode==MODE_TOP){
-                canvas.drawLine(getCurrentCanvasCrop().left,getCurrentCanvasCrop().top+strokeWidth/2,getCurrentCanvasCrop().right,getCurrentCanvasCrop().top+strokeWidth/2,strokePaint);//top
+                canvas.drawLine(getCurrentCanvasCrop().left,strokeWidth/2,getCurrentCanvasCrop().right,strokeWidth/2,strokePaint);//top
             }
             if(mode==MODE_BOTTOM){
-                canvas.drawLine(getCurrentCanvasCrop().left,getCurrentCanvasCrop().bottom-strokeWidth/2,getCurrentCanvasCrop().right,getCurrentCanvasCrop().bottom-strokeWidth/2,strokePaint);//bottom
+                canvas.drawLine(getCurrentCanvasCrop().left,cavasH-strokeWidth/2,getCurrentCanvasCrop().right,cavasH-strokeWidth/2,strokePaint);//bottom
             }
+
+            canvas.drawLine(getCurrentCanvasCrop().left+strokeWidth/2,0,getCurrentCanvasCrop().left+strokeWidth/2,cavasH,strokePaint);//左线
+            canvas.drawLine(getCurrentCanvasCrop().right-strokeWidth/2,0,getCurrentCanvasCrop().right-strokeWidth/2,cavasH,strokePaint);//右线
+
         }
 
-        canvas.drawLine(getCurrentCanvasCrop().left+strokeWidth/2,getCurrentCanvasCrop().top,getCurrentCanvasCrop().left+strokeWidth/2,getCurrentCanvasCrop().bottom,strokePaint);//左线
-        canvas.drawLine(getCurrentCanvasCrop().right-strokeWidth/2,getCurrentCanvasCrop().top,getCurrentCanvasCrop().right-strokeWidth/2,getCurrentCanvasCrop().bottom,strokePaint);//右线
 
     }
 
