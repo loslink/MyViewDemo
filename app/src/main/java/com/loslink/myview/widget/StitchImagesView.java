@@ -27,6 +27,7 @@ public class StitchImagesView extends FrameLayout {
     private StitchImagesAdapter adapter;
     private RelativeLayout rl_right;
     private Context context;
+    public static int actionCursor=0;
 
     public StitchImagesView(Context context) {
         this(context, null);
@@ -54,6 +55,7 @@ public class StitchImagesView extends FrameLayout {
         if (mRecyclerView != null) {
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context);
             mRecyclerView.setLayoutManager(layoutManager);
+
             List<StitchImageInfo> list=new ArrayList<>();
             for(int i=0;i<10;i++){
                 list.add(new StitchImageInfo());
@@ -67,19 +69,31 @@ public class StitchImagesView extends FrameLayout {
                     refreshControllerView();
                 }
             });
-
             mRecyclerView.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     refreshControllerView();
                 }
-            },300);
+            },200);
             adapter.setRecyclerView(mRecyclerView);
+            adapter.setOnStitchImagesListenr(new StitchImagesAdapter.OnStitchImagesListenr() {
+                @Override
+                public void onLoadHolderPosition(int position) {
+//                    if(controllerPosition == position){
+//                        refreshControllerView();
+//                    }
+                }
+            });
         }
     }
 
+    private int controllerPosition=StitchImagesAdapter.EDIT_INDEX_EMPTY;
+
     private void refreshControllerView(){
         int count=mRecyclerView.getChildCount();//缓存
+        if(count<=0){
+            return;
+        }
         Log.e("mRecyclerView","count:"+count);
         int dataCount=adapter.getDatas().size();
         View firstChild=mRecyclerView.getChildAt(0);
@@ -120,8 +134,66 @@ public class StitchImagesView extends FrameLayout {
                 stitchImageInfo.setControllerView(view);
                 setControllerLister(stitchImageInfo,view,position);
             }
+
+            ImageView iv_right=view.findViewById(R.id.iv_right);
+            final StitchImageInfo nextInfo=adapter.getDatas().get(position+1);
+            //含有历史动作且非编辑状态
+//            if(((stitchImageInfo.getHistoryActions()!=null
+//                    && stitchImageInfo.getHistoryActions().size()>0)
+//                    || (nextInfo.getHistoryActions()!=null
+//                    && nextInfo.getHistoryActions().size()>0))
+//                    && !stitchImageInfo.isEditing()
+//                    && !nextInfo.isEditing()
+//                    && adapter.getEditIndex() == StitchImagesAdapter.EDIT_INDEX_EMPTY){
+//                iv_right.setVisibility(View.VISIBLE);
+//            }else{
+//                iv_right.setVisibility(View.GONE);
+//            }
+            if(hasHistoryByCuter(stitchImageInfo,nextInfo,position)){
+                iv_right.setVisibility(View.VISIBLE);
+            }else {
+                iv_right.setVisibility(View.GONE);
+            }
             setControllerViewBg(stitchImageInfo,view,position);
 //            Log.e("mRecyclerView","index:"+j+"   position:"+position+"    bottom:"+child.getBottom());
+        }
+    }
+
+    /**
+     * 该剪刀是否有剪裁记录
+     * @param thatInfo
+     * @param nextInfo
+     * @param cuterIndex
+     * @return
+     */
+    private boolean hasHistoryByCuter(StitchImageInfo thatInfo,StitchImageInfo nextInfo,int cuterIndex){
+        if(((thatInfo.getHistoryActions()!=null
+                && thatInfo.getHistoryActions().size()>0)
+                || (nextInfo.getHistoryActions()!=null
+                && nextInfo.getHistoryActions().size()>0))
+                && !thatInfo.isEditing()
+                && !nextInfo.isEditing()
+                && !adapter.isEdit()
+                ){
+            if(thatInfo.getHistoryActions()!=null){
+                for(int i=0;i<thatInfo.getHistoryActions().size();i++){
+                    if(thatInfo.getHistoryActions().get(i).getCuterIndex()==cuterIndex){
+                        return true;
+                    }
+                }
+            }
+
+            if(nextInfo.getHistoryActions()!=null){
+                for(int i=0;i<nextInfo.getHistoryActions().size();i++){
+                    if(nextInfo.getHistoryActions().get(i).getCuterIndex()==cuterIndex){
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }else{
+            return false;
         }
     }
 
@@ -132,9 +204,10 @@ public class StitchImagesView extends FrameLayout {
      * @param editIndex
      */
     private void setControllerLister(final StitchImageInfo stitchImageInfo, View controllerView, final int editIndex){
-        ImageView iv_left=controllerView.findViewById(R.id.iv_left);
+        final ImageView iv_left=controllerView.findViewById(R.id.iv_left);
         ImageView iv_right=controllerView.findViewById(R.id.iv_right);
         final StitchImageInfo nextInfo=adapter.getDatas().get(editIndex+1);
+
         iv_left.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view2) {
@@ -143,8 +216,9 @@ public class StitchImagesView extends FrameLayout {
                     nextInfo.setToCut(true);
                     stitchImageInfo.setEditing(false);
                     nextInfo.setEditing(false);
-                    adapter.setEditIndex(-1);
-                    refreshControllerView();
+                    adapter.setEdit(false);
+//                    adapter.setEditIndex(StitchImagesAdapter.EDIT_INDEX_EMPTY);
+                    actionCursor++;//每裁剪一次加1
                 }else {
                     adapter.setAllNotCut();
                     adapter.setAllNotEditting();
@@ -152,21 +226,29 @@ public class StitchImagesView extends FrameLayout {
                     adapter.setEdit(true);
                     stitchImageInfo.setEditing(true);
                     nextInfo.setEditing(true);
-                    refreshControllerView();
                 }
+                controllerPosition = editIndex;
                 adapter.notifyDataSetChanged();
+                iv_left.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        refreshControllerView();
+                    }
+                },100);
             }
         });
 
         iv_right.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(stitchImageInfo.isEditing() && nextInfo.isEditing()){//正在编辑的控制杆
+                if(stitchImageInfo.isEditing() && nextInfo.isEditing()){//正在编辑的控制杆-取消
                     adapter.setAllNotCut();
                     stitchImageInfo.setEditing(false);
                     nextInfo.setEditing(false);
-                    adapter.setEditIndex(-1);
+                    adapter.setEdit(false);
                     refreshControllerView();
+                }else {//正常控制杆-返回上一步
+
                 }
                 adapter.notifyDataSetChanged();
             }
@@ -176,13 +258,17 @@ public class StitchImagesView extends FrameLayout {
     private void setControllerViewBg(StitchImageInfo info,View view,int position){
         ImageView iv_left=view.findViewById(R.id.iv_left);
         ImageView iv_right=view.findViewById(R.id.iv_right);
-        if(info.isEditing() && position != adapter.getEditIndex()+1){
+        if(info.isEditing() && adapter.isEdit()){
             iv_left.setBackgroundResource(R.mipmap.ic_stitch_yes);
             iv_right.setBackgroundResource(R.mipmap.ic_stitch_no);
         }else{
             iv_left.setBackgroundResource(R.mipmap.ic_stitch_cut);
             iv_right.setBackgroundResource(R.mipmap.ic_stitch_reset);
         }
+    }
+
+    public void onDestroy(){
+        actionCursor=0;
     }
 
 }

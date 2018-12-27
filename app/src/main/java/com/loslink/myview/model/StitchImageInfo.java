@@ -9,10 +9,11 @@ public class StitchImageInfo {
 
     private String path;
     private View controllerView;
-    private List<RectF> historyActions;
+    private List<StitchHistoryAction> historyActions;
     private boolean isEditing=false;
     private RectF currentCropRectF;//当前裁剪框状态
     private boolean toCut=false;//是否执行剪裁
+    private boolean goBack=false;//是否返回上一步
 
     public String getPath() {
         return path;
@@ -30,11 +31,11 @@ public class StitchImageInfo {
         this.controllerView = controllerView;
     }
 
-    public List<RectF> getHistoryActions() {
+    public List<StitchHistoryAction> getHistoryActions() {
         return historyActions;
     }
 
-    public void setHistoryActions(List<RectF> historyActions) {
+    public void setHistoryActions(List<StitchHistoryAction> historyActions) {
         this.historyActions = historyActions;
     }
 
@@ -60,6 +61,14 @@ public class StitchImageInfo {
 
     public void setToCut(boolean toCut) {
         this.toCut = toCut;
+    }
+
+    public boolean isGoBack() {
+        return goBack;
+    }
+
+    public void setGoBack(boolean goBack) {
+        this.goBack = goBack;
     }
 
 }

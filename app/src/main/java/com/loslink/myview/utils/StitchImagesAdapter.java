@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.loslink.myview.R;
+import com.loslink.myview.model.StitchHistoryAction;
 import com.loslink.myview.model.StitchImageInfo;
 import com.loslink.myview.widget.RegionView;
 
@@ -18,10 +19,13 @@ import java.util.List;
 
 public class StitchImagesAdapter extends RecyclerView.Adapter {
 
+    public static final int EDIT_INDEX_EMPTY=-2;
     private Context mContext;
     private List<StitchImageInfo> imageList = new ArrayList<>();//全部图片
-    private int editIndex = -1;//编辑的开始项下标，共两个编辑项，下一个为：editIndex+1
+    private int editIndex = EDIT_INDEX_EMPTY;//编辑的开始项下标，共两个编辑项，下一个为：editIndex+1
     private boolean isEdit = false;
+    private RecyclerView recyclerView;
+    private OnStitchImagesListenr onStitchImagesListenr;
 
     public RecyclerView getRecyclerView() {
         return recyclerView;
@@ -31,7 +35,14 @@ public class StitchImagesAdapter extends RecyclerView.Adapter {
         this.recyclerView = recyclerView;
     }
 
-    private RecyclerView recyclerView;
+    public OnStitchImagesListenr getOnStitchImagesListenr() {
+        return onStitchImagesListenr;
+    }
+
+    public void setOnStitchImagesListenr(OnStitchImagesListenr onStitchImagesListenr) {
+        this.onStitchImagesListenr = onStitchImagesListenr;
+    }
+
 
     public StitchImagesAdapter(Context context,List<StitchImageInfo> list) {
         mContext = context;
@@ -64,7 +75,7 @@ public class StitchImagesAdapter extends RecyclerView.Adapter {
             imagesViewHolder.regionView.setMode(RegionView.MODE_NOMAL);
         }
 
-        if(editIndex>=0 && (position==editIndex || position==editIndex+1)){
+        if(isEdit && editIndex>=0 && (position==editIndex || position==editIndex+1)){
             imagesViewHolder.regionView.setEdit(true);
             item.setEditing(true);
         }else{
@@ -84,17 +95,21 @@ public class StitchImagesAdapter extends RecyclerView.Adapter {
             }
 
             @Override
-            public void onHistoryAction(List<RectF> historyActions) {
+            public void onHistoryAction(List<StitchHistoryAction> historyActions) {
                 item.setHistoryActions(historyActions);
                 notifyData(recyclerView,position);
+
             }
         });
 
         if(item.isToCut()){//最后才剪裁
             item.setToCut(false);
-            imagesViewHolder.regionView.cutImage();
+            imagesViewHolder.regionView.cutImage(editIndex);
         }
 
+        if(onStitchImagesListenr!=null){
+            onStitchImagesListenr.onLoadHolderPosition(position);
+        }
     }
 
     public void notifyData(final RecyclerView recyclerView, final int position) {
@@ -143,9 +158,6 @@ public class StitchImagesAdapter extends RecyclerView.Adapter {
 
     public void setEdit(boolean edit) {
         isEdit = edit;
-        if(!isEdit){
-            editIndex=-1;
-        }
     }
 
 
@@ -166,9 +178,8 @@ public class StitchImagesAdapter extends RecyclerView.Adapter {
     }
 
 
-    public interface OnStatusListenr{
-        void onEdit(boolean edit);
-        void onDataChange(List<StitchImageInfo> list);
+    public interface OnStitchImagesListenr{
+        void onLoadHolderPosition(int position);
     }
 
 }

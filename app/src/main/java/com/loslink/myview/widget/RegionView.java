@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.loslink.myview.R;
+import com.loslink.myview.model.StitchHistoryAction;
 import com.loslink.myview.model.StitchImageInfo;
 import com.loslink.myview.utils.DipToPx;
 import com.loslink.myview.utils.rx.RxTask;
@@ -50,7 +51,7 @@ public class RegionView extends View {
     private RectF cropRectF;//相对于原图片的尺寸坐标（要表示当前画布坐标需要转化一下）
     private RectF currentCropRectF=new RectF();//当前画布坐标裁剪框
     private RectF LastCropRectF=new RectF();
-    private List<RectF> historyActions=new ArrayList<>();//相对于原图片的尺寸坐标的历史操作
+    private List<StitchHistoryAction> historyActions=new ArrayList<>();//相对于原图片的尺寸坐标的历史操作
     private int status=STATUS_NORMAL;
     private int selectedController;
     private RectF topControllerRect=new RectF(),bottomControllerRect=new RectF();
@@ -108,7 +109,7 @@ public class RegionView extends View {
             currentCropRectF.set(cropRectF);
             return currentCropRectF;
         }
-        RectF hisRectF=historyActions.get(historyActions.size()-1);
+        RectF hisRectF=historyActions.get(historyActions.size()-1).getAction();
         currentCropRectF.set(hisRectF.left,cropRectF.top-hisRectF.top,hisRectF.right,cropRectF.bottom-hisRectF.top);
         return currentCropRectF;
     }
@@ -122,12 +123,12 @@ public class RegionView extends View {
             LastCropRectF.set(0,0,canvasW,cavasH);
             return LastCropRectF;
         }
-        RectF hisRectF=historyActions.get(historyActions.size()-1);
+        RectF hisRectF=historyActions.get(historyActions.size()-1).getAction();
         LastCropRectF.set(hisRectF);
         return LastCropRectF;
     }
 
-    public List<RectF> getHistoryActions() {
+    public List<StitchHistoryAction> getHistoryActions() {
         return historyActions;
     }
 
@@ -135,7 +136,7 @@ public class RegionView extends View {
      * 设置历史动作
      * @param historyActions
      */
-    public void setHistoryActions(List<RectF> historyActions) {
+    public void setHistoryActions(List<StitchHistoryAction> historyActions) {
         if(historyActions!=null){
             this.historyActions = historyActions;
         }else{
@@ -445,7 +446,7 @@ public class RegionView extends View {
         BitmapFactory.decodeResource(getResources(),R.mipmap.girl,optionsOut);
 
         if(historyActions!=null && historyActions.size()>0){
-            RectF rectF=historyActions.get(historyActions.size()-1);
+            RectF rectF=historyActions.get(historyActions.size()-1).getAction();
             startY=(int)rectF.top;
             height=(int)(rectF.bottom-rectF.top);
             cavasH=height;
@@ -511,7 +512,7 @@ public class RegionView extends View {
     /**
      * 裁剪图片
      */
-    public void cutImage(){
+    public void cutImage(int cuterIndex){
 //        if(!isEdit){
 //            return;
 //        }
@@ -528,7 +529,8 @@ public class RegionView extends View {
         if(onRegionViewListenr!=null){
             RectF rectF=new RectF();
             rectF.set(cropRectF);
-            historyActions.add(rectF);//新建一个新对象塞进列表
+            StitchHistoryAction stitchHistoryAction=new StitchHistoryAction(rectF,StitchImagesView.actionCursor,cuterIndex);
+            historyActions.add(stitchHistoryAction);//新建一个新对象塞进列表
             onRegionViewListenr.onHistoryAction(historyActions);//保存裁剪记录
         }
     }
@@ -543,7 +545,7 @@ public class RegionView extends View {
 
     public interface OnRegionViewListenr{
         void onCropRect(RectF cropRectF);
-        void onHistoryAction(List<RectF> historyActions);
+        void onHistoryAction(List<StitchHistoryAction> historyActions);
     }
 }
 
