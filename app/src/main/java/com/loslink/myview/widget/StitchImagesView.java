@@ -138,13 +138,13 @@ public class StitchImagesView extends FrameLayout {
 
             ImageView iv_right=view.findViewById(R.id.iv_right);
             final StitchImageInfo nextInfo=adapter.getDatas().get(position+1);
-            //含有历史动作且非编辑状态
-            if(hasHistoryByCuter(stitchImageInfo,nextInfo,position)){
+            //含有历史动作且非编辑状态 || 编辑状态
+            if(hasHistoryByCuter(stitchImageInfo,nextInfo,position) || (adapter.isEdit() && stitchImageInfo.isEditing() && nextInfo.isEditing())){
                 iv_right.setVisibility(View.VISIBLE);
             }else {
                 iv_right.setVisibility(View.GONE);
             }
-            setControllerViewBg(stitchImageInfo,view,position);
+            setControllerViewBg(stitchImageInfo,nextInfo,view,position);
 //            Log.e("mRecyclerView","index:"+j+"   position:"+position+"    bottom:"+child.getBottom());
         }
     }
@@ -294,10 +294,10 @@ public class StitchImagesView extends FrameLayout {
         });
     }
 
-    private void setControllerViewBg(StitchImageInfo info,View view,int position){
+    private void setControllerViewBg(StitchImageInfo info,StitchImageInfo nextInfo,View view,int position){
         ImageView iv_left=view.findViewById(R.id.iv_left);
         ImageView iv_right=view.findViewById(R.id.iv_right);
-        if(info.isEditing() && adapter.isEdit()){
+        if(info.isEditing() && nextInfo.isEditing() && adapter.isEdit()){
             iv_left.setBackgroundResource(R.mipmap.ic_stitch_yes);
             iv_right.setBackgroundResource(R.mipmap.ic_stitch_no);
         }else{
