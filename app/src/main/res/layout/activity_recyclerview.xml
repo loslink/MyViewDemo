@@ -4,9 +4,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:background="#323232"
     tools:context="com.loslink.myview.MainActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@android:color/black"
+        >
+        <TextView
+            android:id="@+id/tv_save"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:paddingRight="20dp"
+            android:paddingLeft="20dp"
+            android:text="Save"
+            android:textColor="@android:color/white"
+            android:layout_alignParentRight="true"
+            />
+    </RelativeLayout>
+
 
     <com.loslink.myview.widget.StitchImagesView
         android:id="@+id/stitchImagesView"

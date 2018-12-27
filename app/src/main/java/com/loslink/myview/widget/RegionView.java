@@ -28,7 +28,9 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * 显示图片区域
+ * 裁剪图
+ * @author loslink
+ * @time 2018/12/27 15:52
  */
 public class RegionView extends View {
 
@@ -312,7 +314,6 @@ public class RegionView extends View {
      * @param y
      */
     private void scaleCropController(float x, float y) {
-//        tempRect.set(cropRect);// 存贮原有数据，以便还原
         switch (selectedController) {
             case 1:// 选中顶部控制点
                 if(y>0){
@@ -376,6 +377,10 @@ public class RegionView extends View {
     }
 
 
+    /**
+     * 绘制剪裁图片
+     * @param canvas
+     */
     private void drawImage(Canvas canvas){
 
         if(srcPic==null){
@@ -403,6 +408,7 @@ public class RegionView extends View {
         }
 
     }
+
 
     public void setPath(String path){
         imgPath=path;
@@ -501,7 +507,7 @@ public class RegionView extends View {
         rxTask.execute();
     }
 
-    public void setBitmap(Bitmap b) {
+    private void setBitmap(Bitmap b) {
         srcPic = b;
         if(cropRectF.left==0 && cropRectF.top==0 && cropRectF.right==0 && cropRectF.bottom==0){
             cropRectF = new RectF(0, 0, srcPic.getWidth(), srcPic.getHeight());//裁剪框最外围坐标为裁剪真实区

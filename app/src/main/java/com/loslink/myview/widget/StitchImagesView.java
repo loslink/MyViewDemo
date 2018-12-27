@@ -21,7 +21,11 @@ import com.loslink.myview.utils.StitchImagesAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * 长拼图
+ * @author loslink
+ * @time 2018/12/27 15:51
+ */
 public class StitchImagesView extends FrameLayout {
 
     private RecyclerView mRecyclerView;
@@ -29,6 +33,9 @@ public class StitchImagesView extends FrameLayout {
     private RelativeLayout rl_right;
     private Context context;
     public static int actionCursor=0;
+    private int controllerPosition=StitchImagesAdapter.EDIT_INDEX_EMPTY;
+    private List<String> listImagePath;
+    private List<StitchImageInfo> imageInfoList=new ArrayList<>();
 
     public StitchImagesView(Context context) {
         this(context, null);
@@ -44,6 +51,20 @@ public class StitchImagesView extends FrameLayout {
         findViews(context);
     }
 
+    public List<StitchImageInfo> getImageInfoList() {
+        return imageInfoList;
+    }
+
+    public List<String> getListImagePath() {
+        return listImagePath;
+    }
+
+    public void setListImagePath(List<String> listImagePath) {
+        this.listImagePath = listImagePath;
+        initRecyclerView();
+    }
+
+
     private void findViews(Context context) {
         View view = LayoutInflater.from(context).inflate(R.layout.layout_stitch_view, this);
         mRecyclerView = (RecyclerView)view.findViewById(R.id.rv_list);
@@ -53,15 +74,19 @@ public class StitchImagesView extends FrameLayout {
     }
 
     private void initRecyclerView() {
+        if(listImagePath==null){
+            return;
+        }
         if (mRecyclerView != null) {
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context);
             mRecyclerView.setLayoutManager(layoutManager);
 
-            List<StitchImageInfo> list=new ArrayList<>();
-            for(int i=0;i<10;i++){
-                list.add(new StitchImageInfo());
+            for(int i=0;i<listImagePath.size();i++){
+                StitchImageInfo stitchImageInfo=new StitchImageInfo();
+                stitchImageInfo.setPath(listImagePath.get(i));
+                imageInfoList.add(stitchImageInfo);
             }
-            adapter = new StitchImagesAdapter(context,list);
+            adapter = new StitchImagesAdapter(context,imageInfoList);
             mRecyclerView.setAdapter(adapter);
             mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
@@ -88,8 +113,10 @@ public class StitchImagesView extends FrameLayout {
         }
     }
 
-    private int controllerPosition=StitchImagesAdapter.EDIT_INDEX_EMPTY;
 
+    /**
+     * 刷新右控制杆显示
+     */
     private void refreshControllerView(){
         int count=mRecyclerView.getChildCount();//缓存
         if(count<=0){
@@ -309,5 +336,6 @@ public class StitchImagesView extends FrameLayout {
     public void onDestroy(){
         actionCursor=0;
     }
+
 
 }
