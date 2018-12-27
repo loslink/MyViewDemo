@@ -18,6 +18,8 @@ import com.loslink.myview.utils.BitmapUtils;
 import com.loslink.myview.utils.rx.RxTask;
 import com.loslink.myview.widget.StitchImagesView;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +37,7 @@ public class StitchImagesActivity extends Activity {
         tv_save=findViewById(R.id.tv_save);
 
         List<String> listPath=new ArrayList<>();
-        for(int i=0;i<25;i++){
+        for(int i=0;i<10;i++){
             listPath.add("");
         }
         stitchImagesView.setListImagePath(listPath);
@@ -60,12 +62,13 @@ public class StitchImagesActivity extends Activity {
             protected Boolean doInBackground(Integer... integers) {
 //                int IMAGE_WIDTH_MAX_SIZE=1080;
                 int IMAGE_WIDTH_MAX_SIZE=720;
+                int IMAGE_QUANTITY=50;
                 int count=0;
                 while (true){
                     try {
                         count++;
                         Log.e("RegionView","stitchTask count:"+count);
-                        stitchAndSaveImagesToLocal(list,IMAGE_WIDTH_MAX_SIZE);
+                        stitchAndSaveImagesToLocal(list,IMAGE_WIDTH_MAX_SIZE,IMAGE_QUANTITY);
                         return true;
                     } catch (OutOfMemoryError e) {
                         IMAGE_WIDTH_MAX_SIZE=IMAGE_WIDTH_MAX_SIZE-100;
@@ -100,14 +103,13 @@ public class StitchImagesActivity extends Activity {
         rxTask.execute();
     }
 
-    private void stitchAndSaveImagesToLocal(final List<StitchImageInfo> list,int IMAGE_WIDTH_MAX_SIZE) throws OutOfMemoryError{
+    private void stitchAndSaveImagesToLocal(final List<StitchImageInfo> list,int IMAGE_WIDTH_MAX_SIZE,int quantity) throws OutOfMemoryError{
         List<Bitmap> bitmapList=new ArrayList<>();
         for(int i=0;i<list.size();i++){
             final BitmapFactory.Options optionsOut = new BitmapFactory.Options();
             optionsOut.inJustDecodeBounds = true;
             BitmapFactory.decodeResource(getResources(),R.mipmap.girl,optionsOut);
             int scale = 1;
-//            int IMAGE_WIDTH_MAX_SIZE=540;
             if (optionsOut.outWidth > IMAGE_WIDTH_MAX_SIZE) {
                 scale = (int)((float)optionsOut.outWidth/(float)IMAGE_WIDTH_MAX_SIZE);
             }
@@ -120,7 +122,19 @@ public class StitchImagesActivity extends Activity {
             float sx=(float) IMAGE_WIDTH_MAX_SIZE / bmp.getWidth();
             matrix.postScale( sx, sx);
             Bitmap result = Bitmap.createBitmap( bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true );
-//                    bmp.recycle();
+
+
+            if(quantity>0){
+                //压缩质量
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                result.compress(Bitmap.CompressFormat.JPEG, quantity, baos);
+                ByteArrayInputStream isBm = new ByteArrayInputStream(baos.toByteArray());
+                BitmapFactory.Options newOpts = new BitmapFactory.Options();
+                result = BitmapFactory.decodeStream(isBm, null, newOpts);
+                //压缩质量
+            }
+
+
             bitmapList.add(result);
         }
 
