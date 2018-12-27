@@ -14,6 +14,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.loslink.myview.R;
+import com.loslink.myview.model.StitchHistoryAction;
 import com.loslink.myview.model.StitchImageInfo;
 import com.loslink.myview.utils.DipToPx;
 import com.loslink.myview.utils.StitchImagesAdapter;
@@ -138,17 +139,6 @@ public class StitchImagesView extends FrameLayout {
             ImageView iv_right=view.findViewById(R.id.iv_right);
             final StitchImageInfo nextInfo=adapter.getDatas().get(position+1);
             //含有历史动作且非编辑状态
-//            if(((stitchImageInfo.getHistoryActions()!=null
-//                    && stitchImageInfo.getHistoryActions().size()>0)
-//                    || (nextInfo.getHistoryActions()!=null
-//                    && nextInfo.getHistoryActions().size()>0))
-//                    && !stitchImageInfo.isEditing()
-//                    && !nextInfo.isEditing()
-//                    && adapter.getEditIndex() == StitchImagesAdapter.EDIT_INDEX_EMPTY){
-//                iv_right.setVisibility(View.VISIBLE);
-//            }else{
-//                iv_right.setVisibility(View.GONE);
-//            }
             if(hasHistoryByCuter(stitchImageInfo,nextInfo,position)){
                 iv_right.setVisibility(View.VISIBLE);
             }else {
@@ -198,6 +188,50 @@ public class StitchImagesView extends FrameLayout {
     }
 
     /**
+     * 返回剪刀的历史动作
+     * tips：两item对比，返回最新的动作
+     * @param thatInfo
+     * @param nextInfo
+     * @param cuterIndex
+     */
+    private void goBackByHistory(StitchImageInfo thatInfo,StitchImageInfo nextInfo,int cuterIndex){
+
+        StitchHistoryAction thatAction = null,nextAction = null;
+        if(thatInfo.getHistoryActions()!=null){
+            for(int i=thatInfo.getHistoryActions().size()-1;i>=0;i--){
+                if(thatInfo.getHistoryActions().get(i).getCuterIndex()==cuterIndex){//取最新一个
+                    thatAction=thatInfo.getHistoryActions().get(i);
+                    break;
+                }
+            }
+        }
+
+        if(nextInfo.getHistoryActions()!=null){
+            for(int i=nextInfo.getHistoryActions().size()-1;i>=0;i--){
+                if(nextInfo.getHistoryActions().get(i).getCuterIndex()==cuterIndex){//取最新一个
+                    nextAction=nextInfo.getHistoryActions().get(i);
+                    break;
+                }
+            }
+        }
+
+        if(thatAction!=null && nextAction!=null){
+            if(thatAction.getActionIndex() > nextAction.getActionIndex()){//thatAction 在前
+                thatInfo.getHistoryActions().remove(thatAction);
+            }else if(thatAction.getActionIndex() < nextAction.getActionIndex()){//nextAction 在前
+                nextInfo.getHistoryActions().remove(nextAction);
+            }else{//同时期 同剪刀
+                thatInfo.getHistoryActions().remove(thatAction);
+                nextInfo.getHistoryActions().remove(nextAction);
+            }
+        }else if(thatAction!=null){//只存在thatAction
+            thatInfo.getHistoryActions().remove(thatAction);
+        }else if(nextAction!=null){//只存在nextAction
+            nextInfo.getHistoryActions().remove(nextAction);
+        }
+    }
+
+    /**
      * 设置控制杆的监听
      * @param stitchImageInfo
      * @param controllerView
@@ -205,7 +239,7 @@ public class StitchImagesView extends FrameLayout {
      */
     private void setControllerLister(final StitchImageInfo stitchImageInfo, View controllerView, final int editIndex){
         final ImageView iv_left=controllerView.findViewById(R.id.iv_left);
-        ImageView iv_right=controllerView.findViewById(R.id.iv_right);
+        final ImageView iv_right=controllerView.findViewById(R.id.iv_right);
         final StitchImageInfo nextInfo=adapter.getDatas().get(editIndex+1);
 
         iv_left.setOnClickListener(new View.OnClickListener() {
@@ -246,11 +280,16 @@ public class StitchImagesView extends FrameLayout {
                     stitchImageInfo.setEditing(false);
                     nextInfo.setEditing(false);
                     adapter.setEdit(false);
-                    refreshControllerView();
                 }else {//正常控制杆-返回上一步
-
+                    goBackByHistory(stitchImageInfo,nextInfo,editIndex);
                 }
                 adapter.notifyDataSetChanged();
+                iv_right.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        refreshControllerView();
+                    }
+                },100);
             }
         });
     }
