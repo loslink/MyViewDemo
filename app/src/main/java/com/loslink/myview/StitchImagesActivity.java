@@ -62,7 +62,7 @@ public class StitchImagesActivity extends Activity {
             @Override
             protected Boolean doInBackground(Integer... integers) {
 //                int IMAGE_WIDTH_MAX_SIZE=1080;
-                int IMAGE_WIDTH_MAX_SIZE=720;
+                int IMAGE_WIDTH_MAX_SIZE=500;
                 int IMAGE_QUANTITY=50;
                 int count=0;
                 while (true){
@@ -123,11 +123,12 @@ public class StitchImagesActivity extends Activity {
 
             //计算裁剪区
             if(item.getHistoryActions()!=null && item.getHistoryActions().size()>0){
+                float scaleValue=item.getScaleValue();
                 StitchHistoryAction action=item.getHistoryActions().get(item.getHistoryActions().size()-1);
-                int startX=(int)action.getAction().left;
-                int startY=(int)action.getAction().top;
-                int width=(int)(action.getAction().right-action.getAction().left);
-                int height=(int)(action.getAction().bottom-action.getAction().top);
+                int startX=(int)(action.getAction().left*scaleValue)/scale;
+                int startY=(int)(action.getAction().top*scaleValue)/scale;
+                int width=(int)((action.getAction().right-action.getAction().left)*scaleValue)/scale;
+                int height=(int)((action.getAction().bottom-action.getAction().top)*scaleValue)/scale;
                 bmp = Bitmap.createBitmap(bmp, startX, startY, width, height);
             }
 

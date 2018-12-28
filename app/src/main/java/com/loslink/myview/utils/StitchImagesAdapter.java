@@ -100,6 +100,11 @@ public class StitchImagesAdapter extends RecyclerView.Adapter {
                 notifyData(recyclerView,position);
 
             }
+
+            @Override
+            public void onScaleCallback(float scale) {
+                item.setScaleValue(scale);
+            }
         });
 
         if(item.isToCut()){//最后才剪裁

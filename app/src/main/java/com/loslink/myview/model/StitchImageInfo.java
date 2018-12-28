@@ -14,6 +14,7 @@ public class StitchImageInfo {
     private RectF currentCropRectF;//当前裁剪框状态
     private boolean toCut=false;//是否执行剪裁
     private boolean goBack=false;//是否返回上一步
+    private float scaleValue;//缩放后图相对于原图的缩放比，即：原图/缩放后
 
     public String getPath() {
         return path;
@@ -70,5 +71,14 @@ public class StitchImageInfo {
     public void setGoBack(boolean goBack) {
         this.goBack = goBack;
     }
+
+    public float getScaleValue() {
+        return scaleValue;
+    }
+
+    public void setScaleValue(float scaleValue) {
+        this.scaleValue = scaleValue;
+    }
+
 
 }

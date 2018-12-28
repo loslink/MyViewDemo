@@ -460,6 +460,10 @@ public class RegionView extends View {
             startY=0;//还原复用值
             height=0;
             cavasH=(int)(canvasW*((float)optionsOut.outHeight/optionsOut.outWidth));
+            float scale=((float)optionsOut.outWidth/(float)canvasW);
+            if(onRegionViewListenr!=null){
+                onRegionViewListenr.onScaleCallback(scale);
+            }
         }
         setMeasuredDimension(canvasW, cavasH);//传递给父控件,父控件大小(注意：在measure中先确定大小)
 
@@ -552,6 +556,7 @@ public class RegionView extends View {
     public interface OnRegionViewListenr{
         void onCropRect(RectF cropRectF);
         void onHistoryAction(List<StitchHistoryAction> historyActions);
+        void onScaleCallback(float scale);
     }
 }
 
