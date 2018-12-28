@@ -52,6 +52,10 @@ public class StitchImagesActivity extends Activity {
         });
     }
 
+    /**
+     * 执行拼图任务
+     * @param list
+     */
     private void stitchTask(final List<StitchImageInfo> list){
 
         final ProgressDialog progressDialog = new ProgressDialog(this);
@@ -104,6 +108,13 @@ public class StitchImagesActivity extends Activity {
         rxTask.execute();
     }
 
+    /**
+     * 拼图并保存在本地
+     * @param list
+     * @param IMAGE_WIDTH_MAX_SIZE 拼接后图片宽度
+     * @param quantity 压缩图片质量 100为最高原始质量
+     * @throws OutOfMemoryError
+     */
     private void stitchAndSaveImagesToLocal(final List<StitchImageInfo> list,int IMAGE_WIDTH_MAX_SIZE,int quantity) throws OutOfMemoryError{
         List<Bitmap> bitmapList=new ArrayList<>();
         for(int i=0;i<list.size();i++){
