@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.loslink.myview.model.StitchHistoryAction;
 import com.loslink.myview.model.StitchImageInfo;
 import com.loslink.myview.utils.BitmapUtils;
 import com.loslink.myview.utils.rx.RxTask;
@@ -31,7 +32,7 @@ public class StitchImagesActivity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_recyclerview);
+        setContentView(R.layout.activity_stitch_images);
 
         stitchImagesView=findViewById(R.id.stitchImagesView);
         tv_save=findViewById(R.id.tv_save);
@@ -106,6 +107,8 @@ public class StitchImagesActivity extends Activity {
     private void stitchAndSaveImagesToLocal(final List<StitchImageInfo> list,int IMAGE_WIDTH_MAX_SIZE,int quantity) throws OutOfMemoryError{
         List<Bitmap> bitmapList=new ArrayList<>();
         for(int i=0;i<list.size();i++){
+
+            StitchImageInfo item=list.get(i);
             final BitmapFactory.Options optionsOut = new BitmapFactory.Options();
             optionsOut.inJustDecodeBounds = true;
             BitmapFactory.decodeResource(getResources(),R.mipmap.girl,optionsOut);
@@ -117,6 +120,16 @@ public class StitchImagesActivity extends Activity {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inSampleSize = scale;
             Bitmap bmp = BitmapFactory.decodeResource(getResources(),R.mipmap.girl,options);
+
+            //计算裁剪区
+            if(item.getHistoryActions()!=null && item.getHistoryActions().size()>0){
+                StitchHistoryAction action=item.getHistoryActions().get(item.getHistoryActions().size()-1);
+                int startX=(int)action.getAction().left;
+                int startY=(int)action.getAction().top;
+                int width=(int)(action.getAction().right-action.getAction().left);
+                int height=(int)(action.getAction().bottom-action.getAction().top);
+                bmp = Bitmap.createBitmap(bmp, startX, startY, width, height);
+            }
 
             Matrix matrix = new Matrix();
             float sx=(float) IMAGE_WIDTH_MAX_SIZE / bmp.getWidth();

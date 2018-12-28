@@ -503,7 +503,7 @@ public class BitmapUtils {
         canvas.drawBitmap(bitmaps.get(0), 0, 0, null);
         int h = 0;
         for (int j = 1;j<bitmaps.size();j++) {
-            h = bitmaps.get(j).getHeight()+h;
+            h = bitmaps.get(j-1).getHeight()+h;
             canvas.drawBitmap(bitmaps.get(j), 0,h, null);
         }
         return result;
