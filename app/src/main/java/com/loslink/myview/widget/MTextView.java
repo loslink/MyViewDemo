@@ -72,6 +72,34 @@ public class MTextView extends View {
         canvas.drawText(text,canvas.getWidth()/2,canvas.getHeight()/2+200,srcPaint);
 
 
+//        setLayerType(LAYER_TYPE_SOFTWARE, null);//对单独的View在运行时阶段禁用硬件加速
+//        float x, y;
+//        x = 0;
+//        y = 0;
+//        Paint shadowPaint = new Paint();
+//        shadowPaint.setTextSize(200);
+//        shadowPaint.setStyle(Paint.Style.STROKE);
+//        shadowPaint.setAntiAlias(true);
+//        shadowPaint.setShadowLayer(3f, 2f, 2f, Color.parseColor("#55000000"));
+////            canvas.drawText(text,x,y,shadowPaint);
+//
+////            srcPaint.setMaskFilter(new BlurMaskFilter(BAR_HEIGHT / 1.5f, BlurMaskFilter.Blur.INNER));//内发光
+//        Paint paint2 = new Paint();
+//        paint2.setColor(Color.RED);
+//        paint2.setStyle(Paint.Style.FILL);
+//        float[] direction = new float[] { 1, 1, 1 };
+//        // 设置环境光亮度
+//        float light = 0.1f;
+//        // 选择要应用的反射等级
+//        float specular = 6;
+//        // 向mask应用一定级别的模糊
+//        float blur = 5f;
+//        EmbossMaskFilter emboss = new EmbossMaskFilter(direction, light, specular, blur);
+//        paint2.setMaskFilter(emboss);
+//        canvas.drawCircle(300, 250, 50, paint2);
+
+
+
     }
 }
 

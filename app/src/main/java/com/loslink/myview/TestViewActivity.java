@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.view.View;
 
 import com.loslink.myview.widget.AirWingView;
+import com.loslink.myview.widget.CleanNewView;
 import com.loslink.myview.widget.CpuBoostView;
 import com.loslink.myview.widget.FloatBallView;
 import com.loslink.myview.widget.JunkCleanView;
@@ -21,6 +22,7 @@ import butterknife.ButterKnife;
 public class TestViewActivity extends Activity {
 
     public static String KEY_INTENT;
+    private int axtra;
     @BindView(R.id.mEffect)
     MyView mEffect;
     @BindView(R.id.rv_second)
@@ -39,7 +41,9 @@ public class TestViewActivity extends Activity {
     SwitchButton switchButton;
     @BindView(R.id.fv)
     FloatBallView floatBallView;
-    private int axtra;
+    @BindView(R.id.cleanNewView)
+    CleanNewView cleanNewView;
+
 
 
     @Override
@@ -91,6 +95,10 @@ public class TestViewActivity extends Activity {
                 floatBallView.setVisibility(View.VISIBLE);
                 floatBallView.startAnimation();
                 break;
+            case 10:
+                cleanNewView.setVisibility(View.VISIBLE);
+                cleanNewView.startAnimation();
+                break;
         }
 
     }
@@ -98,5 +106,8 @@ public class TestViewActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if(cleanNewView!=null){
+            cleanNewView.destroy();
+        }
     }
 }
