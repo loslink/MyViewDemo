@@ -18,7 +18,7 @@ import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.View;
 
-class MyView extends View {
+public class MyView extends View {
     float phase;
     PathEffect[] effects=new PathEffect[7];
     int[] colors;

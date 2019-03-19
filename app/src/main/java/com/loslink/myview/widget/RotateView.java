@@ -30,7 +30,7 @@ import com.loslink.myview.R;
 
 import javax.xml.datatype.Duration;
 
-class RotateView extends View {
+public class RotateView extends View {
 
     private Paint mBitPaint;
     private Bitmap circle1,circle2,circle3,circle4,circle5;

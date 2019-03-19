@@ -21,7 +21,7 @@ import android.view.animation.AccelerateInterpolator;
 
 import com.loslink.myview.R;
 
-class SwitchButton extends View {
+public class SwitchButton extends View {
 
     private Paint basePaint,circlePaint,textPaint;
     private Context context;
