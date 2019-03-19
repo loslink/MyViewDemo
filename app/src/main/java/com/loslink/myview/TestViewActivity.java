@@ -63,27 +63,33 @@ public class TestViewActivity extends Activity {
                 break;
             case 2:
                 rotateView.setVisibility(View.VISIBLE);
+                rotateView.startAnimation();
                 break;
             case 3:
                 mainCircleView.setVisibility(View.VISIBLE);
+                mainCircleView.startAnimation();
                 break;
             case 4:
                 mTextView.setVisibility(View.VISIBLE);
                 break;
             case 5:
                 airWingView.setVisibility(View.VISIBLE);
+                airWingView.start();
                 break;
             case 6:
                 junkCleanView.setVisibility(View.VISIBLE);
+                junkCleanView.start();
                 break;
             case 7:
                 cpuBoostView.setVisibility(View.VISIBLE);
+                cpuBoostView.start();
                 break;
             case 8:
                 switchButton.setVisibility(View.VISIBLE);
                 break;
             case 9:
                 floatBallView.setVisibility(View.VISIBLE);
+                floatBallView.startAnimation();
                 break;
         }
 
