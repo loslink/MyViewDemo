@@ -11,7 +11,9 @@ import android.graphics.ComposeShader;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.support.annotation.ColorRes;
@@ -21,7 +23,12 @@ import android.view.View;
 import android.view.animation.LinearInterpolator;
 
 import com.loslink.myview.R;
+import com.loslink.myview.model.Bubble;
 import com.loslink.myview.utils.DipToPx;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CleanNewView extends View {
 
@@ -45,6 +52,12 @@ public class CleanNewView extends View {
     private float levelProgress=0f;//垃圾级别
     private float junkFileSizeMax=400f;//垃圾分界最高
     private boolean isStart=false;
+
+    Paint paint;
+    List<Bubble> bubbles = new ArrayList<>();
+    View contentView;
+    float centerWidth = 100, centerHeight = 100;
+    private List<ValueAnimator> animatorList;
 
     public CleanNewView(Context context) {
         this(context, null);
@@ -88,7 +101,13 @@ public class CleanNewView extends View {
         circleInnerPaint.setColor(Color.RED);
         circleInnerPaint.setStyle(Paint.Style.FILL);
 
+        paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setColor(Color.WHITE);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
+
         itemPath = new Path();
+        setLayerType(LAYER_TYPE_SOFTWARE, null);//对单独的View在运行时阶段禁用硬件加速,阴影才有效(不要放onDraw里)
     }
 
     @Override
@@ -100,16 +119,61 @@ public class CleanNewView extends View {
     }
 
     @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        destroy();
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
-        setLayerType(LAYER_TYPE_SOFTWARE, null);//对单独的View在运行时阶段禁用硬件加速,阴影才有效
         canvas.drawColor(getColor(R.color.cleanViewBgColor));
         canvas.translate(canvas.getWidth() / 2, canvas.getHeight() / 2);
-
         drawOuterItems(canvas);
+        drowCircle(canvas);
+//        canvas.drawBitmap(getColorBitmap(),0,INNER_IN_RADIUS*2,circleInnerPaint);
+    }
+
+    /**
+     * 画内圈
+     * @param canvas
+     */
+    private void drowCircle(Canvas canvas){
+        float progress=(currentDegree-startDegree)/(endDegree-startDegree);
 
         canvas.drawCircle(0,0,INNER_OUT_RADIUS,circleWhitePaint);
-
+        int pixel = getBitmapColor(progress);
+        int a = Color.alpha(pixel);
+        int r = Color.red(pixel);
+        int g = Color.green(pixel);
+        int b = Color.blue(pixel);
+        int startColor=Color.argb(a*2/3,r,g,b);
+        LinearGradient linearGradient=new LinearGradient(-INNER_IN_RADIUS,-INNER_IN_RADIUS,
+                INNER_IN_RADIUS-DipToPx.dipToPx(context,80),INNER_IN_RADIUS-DipToPx.dipToPx(context,80),
+                startColor,
+                pixel,
+                Shader.TileMode.CLAMP);
+        circleInnerPaint.setShader(linearGradient);
+        //调用saveLayer时，会生成了一个全新的bitmap，这个bitmap的大小就是我们指定的保存区域的大小，新生成的bitmap是全透明的，在调用saveLayer后所有的绘图操作都是在这个bitmap上进行的。
+        int layerID = canvas.saveLayer(-canvasWidth/2, -canvasHeight/2, canvasWidth/2, canvasHeight/2, circleInnerPaint, Canvas.ALL_SAVE_FLAG);
         canvas.drawCircle(0,0,INNER_IN_RADIUS,circleInnerPaint);
+
+        drawBunbles(canvas);
+    }
+
+    /**
+     * 绘制小气泡
+     * @param canvas
+     */
+    private void drawBunbles(Canvas canvas){
+        canvas.save();
+        canvas.translate(-INNER_IN_RADIUS,-INNER_IN_RADIUS);
+        for (Bubble bubble : bubbles) {
+            if (bubble.pointF.x > 30) {
+                paint.setAlpha(bubble.alph);
+                canvas.drawCircle(bubble.pointF.x, bubble.pointF.y, bubble.radio, paint);
+            }
+        }
+        canvas.restore();
     }
 
     /**
@@ -149,6 +213,7 @@ public class CleanNewView extends View {
         }else{
             levelProgress = junkFileSize/junkFileSizeMax;
         }
+        levelProgress = 1f;
         animator=ValueAnimator.ofFloat(startDegree,endDegree);
 
         animator.setDuration(duration);
@@ -170,9 +235,94 @@ public class CleanNewView extends View {
         });
         animator.start();
         isStart=true;
+        anima((int)(duration/1000)*2);
     }
 
+    public Bubble getRodmBubble() {
+        float radios = (float) (Math.random() * DipToPx.dipToPx(context,7));
+        float centerDX = (float) (Math.random() * centerWidth);
+        float centerDY = (float) (Math.random() * centerHeight);
+        PointF centerPointf = new PointF(INNER_IN_RADIUS + centerDX, INNER_IN_RADIUS + centerDY);
+        float startDX = (float) (Math.random() * INNER_IN_RADIUS * 2);
+        float startDY = INNER_IN_RADIUS * 2;
+        PointF startPointF = new PointF(startDX, startDY);
+        float endDX = (float) (Math.random() * INNER_IN_RADIUS * 2);
+        float endDY = (float) (Math.random() * (INNER_IN_RADIUS - centerHeight / 2));
+        PointF endPointF = new PointF(endDX, endDY);
+        return new Bubble(startPointF, centerPointf, endPointF, radios, INNER_IN_RADIUS * 2);
+    }
 
+    private void anima(int count) {
+        bubbles.clear();
+        if (count == 0)
+            count = 1;
+        for (int i = 0; i < count; i++)
+            startBunblesAnim(i * 500);
+    }
+
+    private void startBunblesAnim(long delay) {
+
+        final List<Bubble> bubbles1 = new ArrayList<>();
+        final int count = 2 + (int) (Math.random() * 3);
+        for (int x = 0; x < count; x++) {
+            bubbles1.add(getRodmBubble());
+            bubbles.addAll(bubbles1);
+        }
+
+        ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f, 2f);
+        animator.setDuration(3000);
+        animator.setStartDelay(delay);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float value = (float) animation.getAnimatedValue();
+                boolean isSpeed = false;
+                if (value < 1) {
+                    value = (3.8f - 1.8f * value) * value * 0.5f;
+                } else {
+                    value = value - 1;
+                    value = (0.4f + 1.6f * value) * value * 0.5f;
+                    isSpeed = true;
+                }
+                for (int x = 0; x < count; x++) {
+                    bubbles1.get(x).notifyData(value, isSpeed);
+                }
+                postInvalidate();
+            }
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                for (Bubble bubble : bubbles1)
+                    bubbles.remove(bubble);
+            }
+        });
+        animator.start();
+        if (null == animatorList) {
+            animatorList = new CopyOnWriteArrayList<>();
+        }
+        animatorList.add(animator);
+    }
+
+    public void cancelBunblesAnim() {
+        if (null != animatorList && animatorList.size() > 0) {
+            for (ValueAnimator animator : animatorList) {
+                if(animator != null && animator.isRunning()){
+                    animator.cancel();
+                }
+                if (null != animator) {
+                    animator.removeAllUpdateListeners();
+                    animator.removeAllListeners();
+                }
+            }
+            animatorList.clear();
+        }
+
+        if (null != bubbles) {
+            bubbles.clear();
+        }
+    }
 
     private int getBitmapColor(float progress) {
         if(colorBitmap==null || colorBitmap.isRecycled()){
@@ -208,10 +358,10 @@ public class CleanNewView extends View {
             int bitmapWidth = mColorAreaBmp.getWidth();
             int bitmapHeight = mColorAreaBmp.getHeight();
             int[] colors = new int[]{getColor(R.color.colorList1), getColor(R.color.colorList2), getColor(R.color.colorList3), getColor(R.color.colorList4), getColor(R.color.colorList5)};
-            Shader leftShader = new LinearGradient(0, bitmapHeight / 2, bitmapWidth, bitmapHeight / 2, colors, null, Shader.TileMode.REPEAT);
+            Shader leftShader = new LinearGradient(0, bitmapHeight / 2, bitmapWidth, bitmapHeight / 2, colors, null, Shader.TileMode.CLAMP);
             ComposeShader shader = new ComposeShader(leftShader, leftShader, PorterDuff.Mode.SCREEN);
 
-            leftPaint.setShader(shader);
+            leftPaint.setShader(leftShader);
             canvas.drawRect(0, 0, width, height, leftPaint);
         }
         return mColorAreaBmp;
@@ -224,6 +374,7 @@ public class CleanNewView extends View {
         if(colorBitmap!=null && !colorBitmap.isRecycled()){
             colorBitmap.recycle();
         }
+        cancelBunblesAnim();
     }
 
     private int getColor(@ColorRes int color){
