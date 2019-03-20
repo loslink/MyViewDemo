@@ -140,8 +140,8 @@
         app:circleWidth="42dp"
         app:strokeWidth="2dp" />
 
-    <com.loslink.myview.widget.CleanNewView
-        android:id="@+id/cleanNewView"
+    <com.loslink.myview.widget.MainCleanNewView
+        android:id="@+id/mainCleanNewView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerHorizontal="true"

@@ -32,7 +32,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CleanNewView extends View {
 
-    private Paint itemPaint,circleWhitePaint,circleInnerPaint;
+    private Paint itemPaint,circleWhitePaint,circleInnerPaint,bunblePaint;
     private long duration=3000;
     private Context context;
     private float canvasWidth, canvasHeight;
@@ -52,11 +52,9 @@ public class CleanNewView extends View {
     private float levelProgress=0f;//垃圾级别
     private float junkFileSizeMax=400f;//垃圾分界最高
     private boolean isStart=false;
-
-    Paint paint;
-    List<Bubble> bubbles = new ArrayList<>();
-    View contentView;
-    float centerWidth = 100, centerHeight = 100;
+    private Runnable delayRunnable;
+    private List<Bubble> bubbles = new ArrayList<>();
+    private float centerWidth = 100, centerHeight = 100;
     private List<ValueAnimator> animatorList;
 
     public CleanNewView(Context context) {
@@ -85,10 +83,13 @@ public class CleanNewView extends View {
                 -BAR_HEIGHT / 2,
                 OUTER_RADIUS,
                 BAR_HEIGHT / 2);
+        itemPath = new Path();
+        itemPath.addRoundRect(itemRectF, BAR_HEIGHT / 2, BAR_HEIGHT / 2, Path.Direction.CCW);//耗性能
 
         itemPaint = new Paint();
         itemPaint.setAntiAlias(true);
         itemPaint.setStyle(Paint.Style.FILL);
+        itemPaint.setShadowLayer(4f,2f,2f,Color.parseColor("#22000000"));
 
         circleWhitePaint = new Paint();
         circleWhitePaint.setAntiAlias(true);
@@ -101,12 +102,12 @@ public class CleanNewView extends View {
         circleInnerPaint.setColor(Color.RED);
         circleInnerPaint.setStyle(Paint.Style.FILL);
 
-        paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setColor(Color.WHITE);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
+        bunblePaint = new Paint();
+        bunblePaint.setAntiAlias(true);
+        bunblePaint.setColor(Color.WHITE);
+        bunblePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
 
-        itemPath = new Path();
+
         setLayerType(LAYER_TYPE_SOFTWARE, null);//对单独的View在运行时阶段禁用硬件加速,阴影才有效(不要放onDraw里)
     }
 
@@ -130,7 +131,6 @@ public class CleanNewView extends View {
         canvas.translate(canvas.getWidth() / 2, canvas.getHeight() / 2);
         drawOuterItems(canvas);
         drowCircle(canvas);
-//        canvas.drawBitmap(getColorBitmap(),0,INNER_IN_RADIUS*2,circleInnerPaint);
     }
 
     /**
@@ -156,7 +156,7 @@ public class CleanNewView extends View {
         //调用saveLayer时，会生成了一个全新的bitmap，这个bitmap的大小就是我们指定的保存区域的大小，新生成的bitmap是全透明的，在调用saveLayer后所有的绘图操作都是在这个bitmap上进行的。
         int layerID = canvas.saveLayer(-canvasWidth/2, -canvasHeight/2, canvasWidth/2, canvasHeight/2, circleInnerPaint, Canvas.ALL_SAVE_FLAG);
         canvas.drawCircle(0,0,INNER_IN_RADIUS,circleInnerPaint);
-
+        linearGradient=null;
         drawBunbles(canvas);
     }
 
@@ -169,8 +169,8 @@ public class CleanNewView extends View {
         canvas.translate(-INNER_IN_RADIUS,-INNER_IN_RADIUS);
         for (Bubble bubble : bubbles) {
             if (bubble.pointF.x > 30) {
-                paint.setAlpha(bubble.alph);
-                canvas.drawCircle(bubble.pointF.x, bubble.pointF.y, bubble.radio, paint);
+                bunblePaint.setAlpha(bubble.alph);
+                canvas.drawCircle(bubble.pointF.x, bubble.pointF.y, bubble.radio, bunblePaint);
             }
         }
         canvas.restore();
@@ -184,8 +184,7 @@ public class CleanNewView extends View {
         canvas.save();
         canvas.rotate(startDegree);
         float lastDegree=startDegree;
-        itemPath.addRoundRect(itemRectF, BAR_HEIGHT / 2, BAR_HEIGHT / 2, Path.Direction.CCW);//耗性能
-//        itemPaint.setShadowLayer(3f,20f,2f,Color.GRAY);
+
         while (true) {
             if(lastDegree > endDegree){
                 break;
@@ -205,7 +204,10 @@ public class CleanNewView extends View {
     }
 
 
-
+    /**
+     * 开始动画
+     * @param junkFileSize
+     */
     public void startAnimation(float junkFileSize){
         float level = junkFileSize/junkFileSizeMax;
         if(level >= 1f){
@@ -214,6 +216,15 @@ public class CleanNewView extends View {
             levelProgress = junkFileSize/junkFileSizeMax;
         }
         levelProgress = 1f;
+
+        if(animator!=null && animator.isRunning()){
+            animator.cancel();
+        }
+        cancelBunblesAnim();
+        if(delayRunnable!=null){
+            removeCallbacks(delayRunnable);
+        }
+
         animator=ValueAnimator.ofFloat(startDegree,endDegree);
 
         animator.setDuration(duration);
@@ -231,15 +242,25 @@ public class CleanNewView extends View {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
+                delayRunnable=new Runnable() {
+                    @Override
+                    public void run() {
+                        cancelBunblesAnim();
+                    }
+                };
+                postDelayed(delayRunnable,3000);
             }
         });
         animator.start();
         isStart=true;
-        anima((int)(duration/1000)*2);
+        anima((int)(duration/1000)*2);//启动气泡
     }
 
-    public Bubble getRodmBubble() {
-        float radios = (float) (Math.random() * DipToPx.dipToPx(context,7));
+    private Bubble getRodmBubble() {
+        float startRadius=DipToPx.dipToPx(context,3);
+        float endRadius=DipToPx.dipToPx(context,7);
+        float radios=(float)(Math.random()*(endRadius-startRadius)+startRadius);
+
         float centerDX = (float) (Math.random() * centerWidth);
         float centerDY = (float) (Math.random() * centerHeight);
         PointF centerPointf = new PointF(INNER_IN_RADIUS + centerDX, INNER_IN_RADIUS + centerDY);
@@ -305,7 +326,7 @@ public class CleanNewView extends View {
         animatorList.add(animator);
     }
 
-    public void cancelBunblesAnim() {
+    private void cancelBunblesAnim() {
         if (null != animatorList && animatorList.size() > 0) {
             for (ValueAnimator animator : animatorList) {
                 if(animator != null && animator.isRunning()){

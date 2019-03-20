@@ -12,6 +12,7 @@ import com.loslink.myview.widget.FloatBallView;
 import com.loslink.myview.widget.JunkCleanView;
 import com.loslink.myview.widget.MTextView;
 import com.loslink.myview.widget.MainCircleView;
+import com.loslink.myview.widget.MainCleanNewView;
 import com.loslink.myview.widget.MyView;
 import com.loslink.myview.widget.RotateView;
 import com.loslink.myview.widget.SwitchButton;
@@ -41,8 +42,8 @@ public class TestViewActivity extends Activity {
     SwitchButton switchButton;
     @BindView(R.id.fv)
     FloatBallView floatBallView;
-    @BindView(R.id.cleanNewView)
-    CleanNewView cleanNewView;
+    @BindView(R.id.mainCleanNewView)
+    MainCleanNewView mainCleanNewView;
 
 
 
@@ -96,11 +97,11 @@ public class TestViewActivity extends Activity {
                 floatBallView.startAnimation();
                 break;
             case 10:
-                cleanNewView.setVisibility(View.VISIBLE);
-                cleanNewView.setOnClickListener(new View.OnClickListener() {
+                mainCleanNewView.setVisibility(View.VISIBLE);
+                mainCleanNewView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        cleanNewView.startAnimation((float) (Math.random()*700f));
+                        mainCleanNewView.startAnimation((float) (Math.random()*700f));
                     }
                 });
 
@@ -112,8 +113,8 @@ public class TestViewActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(cleanNewView!=null){
-            cleanNewView.destroy();
+        if(mainCleanNewView!=null){
+            mainCleanNewView.destroy();
         }
     }
 }
