@@ -97,7 +97,13 @@ public class TestViewActivity extends Activity {
                 break;
             case 10:
                 cleanNewView.setVisibility(View.VISIBLE);
-                cleanNewView.startAnimation();
+                cleanNewView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        cleanNewView.startAnimation((float) (Math.random()*700f));
+                    }
+                });
+
                 break;
         }
 

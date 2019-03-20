@@ -16,4 +16,12 @@
     <color name="floatBallCircleGreenOutColor">#24c092</color>
     <color name="floatBallCircleRedColor">#ccf95c5c</color>
     <color name="floatBallCircleRedOutColor">#f95c5c</color>
+
+    <color name="colorList1">#43d37d</color>
+    <color name="colorList2">#fff600</color>
+    <color name="colorList3">#ff5a00</color>
+    <color name="colorList4">#f61111</color>
+    <color name="colorList5">#ba2718</color>
+    <color name="cleanViewBgColor">#f0f0f0</color>
+    <color name="cleanItemGrayColor">#c8c8c8</color>
 </resources>
