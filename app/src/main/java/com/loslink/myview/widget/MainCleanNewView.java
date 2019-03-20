@@ -14,6 +14,26 @@ public class MainCleanNewView extends FrameLayout {
 
     private CleanNewView cleanNewView;
     private TextView tv_text,tv_clean;
+    private CleanState currentCleanState;
+    private CleanClickListener cleanClickListener;
+
+    public enum CleanState {
+        None,//错误状态
+        Analysing,//扫描阶段
+        AnalyseFinish,//扫描完成，发现垃圾
+        Checking,//检查垃圾
+        CheckFinish,//垃圾检查完成
+        BestState//最佳状态
+    }
+
+    public CleanClickListener getCleanClickListener() {
+        return cleanClickListener;
+    }
+
+    public void setCleanClickListener(CleanClickListener cleanClickListener) {
+        this.cleanClickListener = cleanClickListener;
+    }
+
 
     public MainCleanNewView(Context context) {
         this(context, null);
@@ -26,6 +46,7 @@ public class MainCleanNewView extends FrameLayout {
     public MainCleanNewView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         findViews(context);
+        setListenr();
     }
 
     private void findViews(Context context) {
@@ -35,14 +56,67 @@ public class MainCleanNewView extends FrameLayout {
         tv_clean = view.findViewById(R.id.tv_clean);
     }
 
+    private void setListenr(){
+        tv_clean.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(cleanClickListener!=null){
+                    switch (currentCleanState){
+                        case AnalyseFinish:
+                            cleanClickListener.onCheck();
+                            break;
+                        case CheckFinish:
+                            cleanClickListener.onClean();
+                            break;
+                    }
+                }
+
+            }
+        });
+    }
+
+    public void setCleanState(CleanState cleanState){
+        currentCleanState=cleanState;
+        switch (cleanState){
+            case Analysing:
+                tv_text.setVisibility(View.GONE);
+                tv_clean.setVisibility(View.GONE);
+                break;
+            case AnalyseFinish:
+                tv_text.setVisibility(View.VISIBLE);
+                tv_clean.setVisibility(View.VISIBLE);
+                tv_text.setText("Junk Files Found");
+                tv_clean.setText("CHECK");
+                break;
+            case Checking:
+                tv_text.setVisibility(View.VISIBLE);
+                tv_clean.setVisibility(View.GONE);
+                break;
+            case CheckFinish:
+                tv_text.setVisibility(View.VISIBLE);
+                tv_clean.setVisibility(View.VISIBLE);
+                tv_clean.setText("CLEAN");
+                break;
+        }
+    }
 
     public void startAnimation(float junkFileSize){
         cleanNewView.startAnimation(junkFileSize);
     }
 
+    public void setJunkFileSize(float junkFileSize){
+        tv_text.setText((int)junkFileSize+" MB");
+    }
+
+
     public void destroy(){
         if(cleanNewView!=null){
             cleanNewView.destroy();
         }
+    }
+
+    public interface CleanClickListener {
+        void onCheck();
+        void onClean();
     }
 }

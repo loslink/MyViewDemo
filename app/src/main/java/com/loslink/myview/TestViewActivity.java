@@ -98,16 +98,85 @@ public class TestViewActivity extends Activity {
                 break;
             case 10:
                 mainCleanNewView.setVisibility(View.VISIBLE);
-                mainCleanNewView.setOnClickListener(new View.OnClickListener() {
+                analyseJunkFiles();
+                mainCleanNewView.setCleanClickListener(new MainCleanNewView.CleanClickListener() {
                     @Override
-                    public void onClick(View v) {
-                        mainCleanNewView.startAnimation((float) (Math.random()*700f));
+                    public void onCheck() {
+                        checkJunkFiles();
+                    }
+
+                    @Override
+                    public void onClean() {
+
                     }
                 });
-
                 break;
         }
 
+    }
+
+    private void analyseJunkFiles(){
+        mainCleanNewView.setCleanState(MainCleanNewView.CleanState.Analysing);
+        mainCleanNewView.startAnimation((float) (Math.random()*700f));
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int size = 0;
+                while(true){
+                    size+=20;
+                    if(size>6000){
+                        break;
+                    }
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mainCleanNewView.setCleanState(MainCleanNewView.CleanState.AnalyseFinish);
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private void checkJunkFiles(){
+        mainCleanNewView.setCleanState(MainCleanNewView.CleanState.Checking);
+        mainCleanNewView.startAnimation((float) (Math.random()*700f));
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int size = 0;
+                while(true){
+                    size+=20;
+                    final int finalSize = size;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mainCleanNewView.setJunkFileSize(finalSize);
+                        }
+                    });
+
+                    if(size>6000){
+                        break;
+                    }
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mainCleanNewView.setCleanState(MainCleanNewView.CleanState.CheckFinish);
+                    }
+                });
+            }
+        }).start();
     }
 
     @Override

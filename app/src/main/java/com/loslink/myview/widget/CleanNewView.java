@@ -203,6 +203,9 @@ public class CleanNewView extends View {
         canvas.restore();
     }
 
+    public void setCleanState(MainCleanNewView.CleanState cleanState){
+
+    }
 
     /**
      * 开始动画
@@ -388,6 +391,10 @@ public class CleanNewView extends View {
         return mColorAreaBmp;
     }
 
+    private int getColor(@ColorRes int color){
+        return context.getResources().getColor(color);
+    }
+
     public void destroy(){
         if(animator!=null && animator.isRunning()){
             animator.cancel();
@@ -398,8 +405,6 @@ public class CleanNewView extends View {
         cancelBunblesAnim();
     }
 
-    private int getColor(@ColorRes int color){
-        return context.getResources().getColor(color);
-    }
+
 }
 
