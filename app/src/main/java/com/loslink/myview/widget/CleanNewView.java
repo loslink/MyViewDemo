@@ -44,7 +44,7 @@ public class CleanNewView extends View {
     private float startDegree=-215, endDegree=35f;
     private float currentDegree=startDegree;
     private float itemDegree=5f;
-    private ValueAnimator animator;
+    private ValueAnimator animator,repeatAnimator;
     private RectF itemRectF;
     private Path itemPath;
     private int colorBitWidth=100,colorBitHeigth=10;
@@ -56,6 +56,9 @@ public class CleanNewView extends View {
     private List<Bubble> bubbles = new ArrayList<>();
     private float centerWidth = 100, centerHeight = 100;
     private List<ValueAnimator> animatorList;
+    private MainCleanNewView.CleanState currentCleanState;
+    private float junkFileSize;
+    private int blueItemCount=6;
 
     public CleanNewView(Context context) {
         this(context, null);
@@ -139,6 +142,12 @@ public class CleanNewView extends View {
      */
     private void drowCircle(Canvas canvas){
         float progress=(currentDegree-startDegree)/(endDegree-startDegree);
+        if(currentCleanState == MainCleanNewView.CleanState.Checking){
+            progress=junkFileSize/junkFileSizeMax;
+            if(progress>1f){
+                progress=1f;
+            }
+        }
 
         canvas.drawCircle(0,0,INNER_OUT_RADIUS,circleWhitePaint);
         int pixel = getBitmapColor(progress);
@@ -184,41 +193,73 @@ public class CleanNewView extends View {
         canvas.save();
         canvas.rotate(startDegree);
         float lastDegree=startDegree;
+        int itemIndex=0;
 
         while (true) {
             if(lastDegree > endDegree){
                 break;
             }
-            if(isStart && lastDegree <= currentDegree){
-                float progress=(lastDegree-startDegree)/(endDegree-startDegree);
-                itemPaint.setColor(getBitmapColor(progress));
-            }else{
-                itemPaint.setColor(getColor(R.color.cleanItemGrayColor));
+            switch (currentCleanState){
+                case Analysing:
+                    itemPaint.setColor(getColor(R.color.cleanItemGrayColor));
+                    break;
+                case AnalyseFinish:
+                    break;
+                case Checking:
+                    int currentItem=(int)((currentDegree-startDegree)/itemDegree);
+                    if(itemIndex>=(currentItem-blueItemCount) && itemIndex<=currentItem){
+                        itemPaint.setColor(getBitmapColor(0));
+                    }else{
+                        itemPaint.setColor(getColor(R.color.cleanItemGrayColor));
+                    }
+                    break;
+                case CheckFinish:
+                    if(isStart && lastDegree <= currentDegree){
+                        float progress=(lastDegree-startDegree)/(endDegree-startDegree);
+                        itemPaint.setColor(getBitmapColor(progress));
+                    }else{
+                        itemPaint.setColor(getColor(R.color.cleanItemGrayColor));
+                    }
+                    break;
             }
             canvas.drawPath(itemPath, itemPaint);
 
             canvas.rotate(itemDegree);
             lastDegree = lastDegree+itemDegree;
+            itemIndex++;
         }
         canvas.restore();
     }
 
     public void setCleanState(MainCleanNewView.CleanState cleanState){
+        currentCleanState=cleanState;
+        switch (cleanState){
+            case Analysing:
+                levelProgress = 0.5f;
+                break;
+            case AnalyseFinish:
+                break;
+            case Checking:
+                levelProgress = 1f;
+                break;
+            case CheckFinish:
+                break;
+        }
+    }
 
+    public void setJunkFileSize(float junkFileSize){
+        this.junkFileSize=junkFileSize;
     }
 
     /**
      * 开始动画
-     * @param junkFileSize
      */
-    public void startAnimation(float junkFileSize){
-        float level = junkFileSize/junkFileSizeMax;
-        if(level >= 1f){
-            levelProgress = 1f;
-        }else{
-            levelProgress = junkFileSize/junkFileSizeMax;
+    public void startAnimation(){
+
+        if(currentCleanState == MainCleanNewView.CleanState.Checking){
+            startRepeatAnimation();
+            return;
         }
-        levelProgress = 1f;
 
         if(animator!=null && animator.isRunning()){
             animator.cancel();
@@ -257,6 +298,52 @@ public class CleanNewView extends View {
         animator.start();
         isStart=true;
         anima((int)(duration/1000)*2);//启动气泡
+    }
+
+    public void startRepeatAnimation(){
+
+        if(repeatAnimator!=null && repeatAnimator.isRunning()){
+            repeatAnimator.cancel();
+        }
+
+        repeatAnimator=ValueAnimator.ofFloat(startDegree,endDegree+(itemDegree*blueItemCount));
+
+        final long duration=1500;
+        repeatAnimator.setDuration(duration);
+        repeatAnimator.setInterpolator(new LinearInterpolator());
+        repeatAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        repeatAnimator.setRepeatMode(ValueAnimator.RESTART);
+        repeatAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                currentDegree= (float) animation.getAnimatedValue();
+                postInvalidate();
+                if(currentCleanState == MainCleanNewView.CleanState.CheckFinish){
+                    repeatAnimator.cancel();
+                    startAnimation();
+                }
+            }
+        });
+        repeatAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+                super.onAnimationRepeat(animation);
+                for(int i=0;i<duration/500;i++){
+                    startBunblesAnim(i*500);
+                }
+            }
+        });
+        repeatAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+            }
+        });
+        for(int i=0;i<duration/500;i++){
+            startBunblesAnim(i*500);
+        }
+        repeatAnimator.start();
+        isStart=true;
     }
 
     private Bubble getRodmBubble() {
@@ -398,6 +485,9 @@ public class CleanNewView extends View {
     public void destroy(){
         if(animator!=null && animator.isRunning()){
             animator.cancel();
+        }
+        if(repeatAnimator!=null && repeatAnimator.isRunning()){
+            repeatAnimator.cancel();
         }
         if(colorBitmap!=null && !colorBitmap.isRecycled()){
             colorBitmap.recycle();

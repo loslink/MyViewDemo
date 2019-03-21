@@ -117,7 +117,7 @@ public class TestViewActivity extends Activity {
 
     private void analyseJunkFiles(){
         mainCleanNewView.setCleanState(MainCleanNewView.CleanState.Analysing);
-        mainCleanNewView.startAnimation((float) (Math.random()*700f));
+        mainCleanNewView.startAnimation();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -145,7 +145,7 @@ public class TestViewActivity extends Activity {
 
     private void checkJunkFiles(){
         mainCleanNewView.setCleanState(MainCleanNewView.CleanState.Checking);
-        mainCleanNewView.startAnimation((float) (Math.random()*700f));
+        mainCleanNewView.startAnimation();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -160,7 +160,7 @@ public class TestViewActivity extends Activity {
                         }
                     });
 
-                    if(size>6000){
+                    if(size>10000){
                         break;
                     }
                     try {

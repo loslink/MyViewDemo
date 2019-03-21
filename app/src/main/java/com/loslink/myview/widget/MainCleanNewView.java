@@ -76,6 +76,7 @@ public class MainCleanNewView extends FrameLayout {
     }
 
     public void setCleanState(CleanState cleanState){
+        cleanNewView.setCleanState(cleanState);
         currentCleanState=cleanState;
         switch (cleanState){
             case Analysing:
@@ -100,11 +101,12 @@ public class MainCleanNewView extends FrameLayout {
         }
     }
 
-    public void startAnimation(float junkFileSize){
-        cleanNewView.startAnimation(junkFileSize);
+    public void startAnimation(){
+        cleanNewView.startAnimation();
     }
 
     public void setJunkFileSize(float junkFileSize){
+        cleanNewView.setJunkFileSize(junkFileSize);
         tv_text.setText((int)junkFileSize+" MB");
     }
 
