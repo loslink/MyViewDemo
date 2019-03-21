@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ComposeShader;
 import android.graphics.LinearGradient;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
@@ -16,6 +17,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.graphics.Shader;
+import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -59,6 +61,8 @@ public class CleanNewView extends View {
     private MainCleanNewView.CleanState currentCleanState;
     private float junkFileSize;
     private int blueItemCount=6;
+    private Matrix shadowMatrix;
+    private Bitmap shadowBitmap;
 
     public CleanNewView(Context context) {
         this(context, null);
@@ -98,7 +102,8 @@ public class CleanNewView extends View {
         circleWhitePaint.setAntiAlias(true);
         circleWhitePaint.setColor(Color.WHITE);
         circleWhitePaint.setStyle(Paint.Style.FILL);
-        circleWhitePaint.setShadowLayer(10,6f,6f,Color.parseColor("#11000000"));
+//        circleWhitePaint.setShadowLayer(10,6f,6f,Color.parseColor("#11000000"));//需要关闭硬件加速
+//        setLayerType(LAYER_TYPE_SOFTWARE, null);//对单独的View在运行时阶段禁用硬件加速,阴影才有效(不要放onDraw里)
 
         circleInnerPaint = new Paint();
         circleInnerPaint.setAntiAlias(true);
@@ -110,9 +115,15 @@ public class CleanNewView extends View {
         bunblePaint.setColor(Color.WHITE);
         bunblePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
 
+        shadowMatrix =new Matrix();
+        shadowBitmap = ((BitmapDrawable) getResources().getDrawable(R.mipmap.ic_main_clean_shadow)).getBitmap();
+        float resultW=(INNER_OUT_RADIUS+DipToPx.dipToPx(context,6))*2f;
+        float par=resultW/(float) shadowBitmap.getWidth();
+        shadowMatrix.setScale(par,par);
+        shadowMatrix.postTranslate(-resultW/2,-resultW/2);
 
-        setLayerType(LAYER_TYPE_SOFTWARE, null);//对单独的View在运行时阶段禁用硬件加速,阴影才有效(不要放onDraw里)
     }
+
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -149,6 +160,7 @@ public class CleanNewView extends View {
             }
         }
 
+        canvas.drawBitmap(shadowBitmap, shadowMatrix,circleWhitePaint);
         canvas.drawCircle(0,0,INNER_OUT_RADIUS,circleWhitePaint);
         int pixel = getBitmapColor(progress);
         int a = Color.alpha(pixel);
@@ -208,7 +220,7 @@ public class CleanNewView extends View {
                 case Checking:
                     int currentItem=(int)((currentDegree-startDegree)/itemDegree);
                     if(itemIndex>=(currentItem-blueItemCount) && itemIndex<=currentItem){
-                        itemPaint.setColor(getBitmapColor(0));
+                        itemPaint.setColor(Color.parseColor("#3c8ef4"));
                     }else{
                         itemPaint.setColor(getColor(R.color.cleanItemGrayColor));
                     }
