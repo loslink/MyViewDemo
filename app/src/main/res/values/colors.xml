@@ -17,11 +17,16 @@
     <color name="floatBallCircleRedColor">#ccf95c5c</color>
     <color name="floatBallCircleRedOutColor">#f95c5c</color>
 
+    <color name="startColorList1">#8cff8c</color>
+    <color name="startColorList2">#fffa6c</color>
+    <color name="startColorList3">#ffb109</color>
+    <color name="startColorList4">#ff8003</color>
+    <color name="startColorList5">#ff5d24</color>
     <color name="colorList1">#43d37d</color>
-    <color name="colorList2">#fff600</color>
-    <color name="colorList3">#ff5a00</color>
-    <color name="colorList4">#f61111</color>
-    <color name="colorList5">#de0c0c</color>
+    <color name="colorList2">#f3c00e</color>
+    <color name="colorList3">#ff4800</color>
+    <color name="colorList4">#f30808</color>
+    <color name="colorList5">#e70000</color>
     <color name="cleanViewBgColor">#f0f0f0</color>
     <color name="cleanItemGrayColor">#c8c8c8</color>
 </resources>
