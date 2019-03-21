@@ -68,6 +68,9 @@ public class MainCleanNewView extends FrameLayout {
                         case CheckFinish:
                             cleanClickListener.onClean();
                             break;
+                        case BestState:
+                            cleanClickListener.onBestCheck();
+                            break;
                     }
                 }
 
@@ -98,6 +101,12 @@ public class MainCleanNewView extends FrameLayout {
                 tv_clean.setVisibility(View.VISIBLE);
                 tv_clean.setText("CLEAN");
                 break;
+            case BestState:
+                tv_text.setVisibility(View.VISIBLE);
+                tv_clean.setVisibility(View.VISIBLE);
+                tv_clean.setText("CHECK");
+                tv_text.setText("Best state");
+                break;
         }
     }
 
@@ -120,5 +129,6 @@ public class MainCleanNewView extends FrameLayout {
     public interface CleanClickListener {
         void onCheck();
         void onClean();
+        void onBestCheck();
     }
 }

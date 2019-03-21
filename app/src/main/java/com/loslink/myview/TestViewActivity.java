@@ -107,6 +107,11 @@ public class TestViewActivity extends Activity {
 
                     @Override
                     public void onClean() {
+                        mainCleanNewView.setCleanState(MainCleanNewView.CleanState.BestState);
+                    }
+
+                    @Override
+                    public void onBestCheck() {
 
                     }
                 });

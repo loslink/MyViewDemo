@@ -221,6 +221,9 @@ public class CleanNewView extends View {
                         itemPaint.setColor(getColor(R.color.cleanItemGrayColor));
                     }
                     break;
+                case BestState:
+                    itemPaint.setColor(getColor(R.color.cleanItemGrayColor));
+                    break;
             }
             canvas.drawPath(itemPath, itemPaint);
 
@@ -243,6 +246,10 @@ public class CleanNewView extends View {
                 levelProgress = 1f;
                 break;
             case CheckFinish:
+                break;
+            case BestState:
+                levelProgress = 0f;
+                postInvalidate();
                 break;
         }
     }
