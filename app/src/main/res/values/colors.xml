@@ -29,4 +29,6 @@
     <color name="colorList5">#e70000</color>
     <color name="cleanViewBgColor">#f0f0f0</color>
     <color name="cleanItemGrayColor">#c8c8c8</color>
+
+    <color name="cleanItemDetailLightColor">#d4daf2</color>
 </resources>

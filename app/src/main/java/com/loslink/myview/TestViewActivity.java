@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.view.View;
 
 import com.loslink.myview.widget.AirWingView;
+import com.loslink.myview.widget.CleanDetailView;
 import com.loslink.myview.widget.CleanNewView;
 import com.loslink.myview.widget.CpuBoostView;
 import com.loslink.myview.widget.FloatBallView;
@@ -44,7 +45,8 @@ public class TestViewActivity extends Activity {
     FloatBallView floatBallView;
     @BindView(R.id.mainCleanNewView)
     MainCleanNewView mainCleanNewView;
-
+    @BindView(R.id.cleanDetailView)
+    CleanDetailView cleanDetailView;
 
 
     @Override
@@ -115,6 +117,11 @@ public class TestViewActivity extends Activity {
 
                     }
                 });
+                break;
+            case 11:
+                cleanDetailView.setVisibility(View.VISIBLE);
+                cleanDetailView.setCleanState(CleanDetailView.CleanDetailState.Checking);
+                cleanDetailView.startAnimation();
                 break;
         }
 
