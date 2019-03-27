@@ -34,7 +34,6 @@ public class CleanDetailView extends View {
     private ValueAnimator animator, repeatAnimator;
     private RectF itemRectF;
     private Path itemPath;
-    private float levelProgress = 0f;//垃圾级别
     private boolean isStart = false;
     private float centerWidth = 100, centerHeight = 100;
     private CleanDetailState currentCleanState;
@@ -70,7 +69,7 @@ public class CleanDetailView extends View {
         itemPaint = new Paint();
         itemPaint.setAntiAlias(true);
         itemPaint.setStyle(Paint.Style.FILL);
-        itemPaint.setShadowLayer(4f, 2f, 2f, Color.parseColor("#22000000"));
+//        itemPaint.setShadowLayer(4f, 2f, 2f, Color.parseColor("#22000000"));
 
     }
 
@@ -149,7 +148,6 @@ public class CleanDetailView extends View {
         currentCleanState = cleanState;
         switch (cleanState) {
             case Checking:
-                levelProgress = 1f;
                 break;
             case CheckFinish:
                 break;
