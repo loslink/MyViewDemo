@@ -105,7 +105,9 @@ public class CleanDetailView extends View {
         canvas.rotate(startDegree);
         float lastDegree = startDegree;
         int itemIndex = 0;
-
+        if(currentCleanState==null){
+            return;
+        }
         while (true) {
             if (lastDegree > endDegree ) {
                 break;
