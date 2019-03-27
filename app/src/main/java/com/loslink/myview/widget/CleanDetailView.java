@@ -21,7 +21,7 @@ import com.loslink.myview.utils.DipToPx;
 public class CleanDetailView extends View {
 
     private Paint itemPaint;
-    private long duration = 3000;
+    private long duration = 1000;
     private Context context;
     private float canvasWidth, canvasHeight;
     private float OUTER_RADIUS = 70;
