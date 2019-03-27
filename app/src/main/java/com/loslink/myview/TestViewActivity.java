@@ -127,7 +127,7 @@ public class TestViewActivity extends Activity {
                     public void run() {
                         cleanDetailView.setCleanState(CleanDetailView.CleanDetailState.CheckFinish);
                     }
-                },5000);
+                },3500);
                 break;
         }
 

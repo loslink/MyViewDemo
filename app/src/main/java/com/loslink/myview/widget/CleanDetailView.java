@@ -39,7 +39,7 @@ public class CleanDetailView extends View {
     private float centerWidth = 100, centerHeight = 100;
     private CleanDetailState currentCleanState;
     private float junkFileSize;
-    private int blueItemCount = 12;
+    private int blueItemCount = 6;
 
     public CleanDetailView(Context context) {
         this(context, null);
@@ -123,10 +123,15 @@ public class CleanDetailView extends View {
                     }
                     break;
                 case CheckFinish:
-                    float current=currentDegree%endDegree;
-                    if (isStart && lastDegree <= current + currentDegree2) {
+                    int currentItem2 = (int) ((currentDegree - startDegree) / itemDegree);//停止的item
+                    int startCount2 = (int) ((currentDegree - endDegree) / itemDegree);
+                    float current=currentDegree%endDegree;//停止的位置角度
+                    if((currentDegree > endDegree && itemIndex < startCount2)
+                            || (itemIndex >= (currentItem2 - blueItemCount) && itemIndex <= currentItem2)
+                            || ((lastDegree <= current + currentDegree2) && lastDegree >= current)
+                            || (currentDegree2 > (endDegree-current) && lastDegree<(currentDegree2-(endDegree-current)))){
                         itemPaint.setColor(Color.parseColor("#6482fc"));
-                    } else {
+                    }else {
                         itemPaint.setColor(getColor(R.color.cleanItemDetailLightColor));
                     }
                     break;
