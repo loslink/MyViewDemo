@@ -29,6 +29,7 @@ public class CleanDetailView extends View {
     private float BAR_HEIGHT = 2;
     private float startDegree = 0, endDegree = 360f;
     private float currentDegree = startDegree;
+    private float currentDegree2 = startDegree;
     private float itemDegree = 5f;
     private ValueAnimator animator, repeatAnimator;
     private RectF itemRectF;
@@ -122,9 +123,9 @@ public class CleanDetailView extends View {
                     }
                     break;
                 case CheckFinish:
-                    if (isStart && lastDegree <= currentDegree) {
-//                        float progress = (lastDegree - startDegree) / (endDegree - startDegree);
-//                        itemPaint.setColor(getBitmapColor(progress));
+                    float current=currentDegree%endDegree;
+                    if (isStart && lastDegree <= current + currentDegree2) {
+                        itemPaint.setColor(Color.parseColor("#6482fc"));
                     } else {
                         itemPaint.setColor(getColor(R.color.cleanItemDetailLightColor));
                     }
@@ -167,7 +168,7 @@ public class CleanDetailView extends View {
         if (animator != null && animator.isRunning()) {
             animator.cancel();
         }
-        animator = ValueAnimator.ofFloat(startDegree, endDegree);
+        animator = ValueAnimator.ofFloat(0, endDegree-(itemDegree * blueItemCount));
 
         animator.setDuration(duration);
         animator.setInterpolator(new LinearInterpolator());
@@ -176,7 +177,7 @@ public class CleanDetailView extends View {
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                currentDegree = (float) animation.getAnimatedValue();
+                currentDegree2 = (float) animation.getAnimatedValue();
                 postInvalidate();
             }
         });
@@ -210,6 +211,7 @@ public class CleanDetailView extends View {
                 currentDegree = (float) animation.getAnimatedValue();
                 postInvalidate();
                 if (currentCleanState == CleanDetailState.CheckFinish) {
+                    postInvalidate();
                     repeatAnimator.cancel();
                     startAnimation();
                 }

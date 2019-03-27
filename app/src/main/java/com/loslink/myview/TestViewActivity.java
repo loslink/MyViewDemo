@@ -122,6 +122,12 @@ public class TestViewActivity extends Activity {
                 cleanDetailView.setVisibility(View.VISIBLE);
                 cleanDetailView.setCleanState(CleanDetailView.CleanDetailState.Checking);
                 cleanDetailView.startAnimation();
+                cleanDetailView.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        cleanDetailView.setCleanState(CleanDetailView.CleanDetailState.CheckFinish);
+                    }
+                },5000);
                 break;
         }
 
