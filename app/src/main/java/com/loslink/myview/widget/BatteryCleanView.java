@@ -24,9 +24,9 @@ public class BatteryCleanView extends View {
     private long duration = 1000;
     private Context context;
     private float canvasWidth, canvasHeight;
-    private float OUTER_RADIUS = 100;
-    private float BAR_WIDTH = 9;
-    private float BAR_HEIGHT = 2;
+    private float OUTER_RADIUS = 107;
+    private float BAR_WIDTH = 12;
+    private float BAR_HEIGHT = 4;
     private float startDegree = 0, endDegree = 360f;
     private float currentDegree = startDegree;
     private float currentDegree2 = startDegree;
@@ -117,7 +117,7 @@ public class BatteryCleanView extends View {
                     int startCount = (int) ((currentDegree - endDegree) / itemDegree);
                     if((currentDegree > endDegree && itemIndex < startCount)
                             || (itemIndex >= (currentItem - blueItemCount) && itemIndex <= currentItem )){
-                        itemPaint.setColor(Color.GREEN);
+                        itemPaint.setColor(getColor(R.color.cleanItemBatteryDarkColor));
                     } else {
                         itemPaint.setColor(getColor(R.color.cleanItemBatteryLightColor));
                     }
@@ -130,7 +130,7 @@ public class BatteryCleanView extends View {
                             || (itemIndex >= (currentItem2 - blueItemCount) && itemIndex <= currentItem2)
                             || ((lastDegree <= current + currentDegree2) && lastDegree >= current)
                             || (currentDegree2 > (endDegree-current) && lastDegree<(currentDegree2-(endDegree-current)))){
-                        itemPaint.setColor(Color.GREEN);
+                        itemPaint.setColor(getColor(R.color.cleanItemBatteryDarkColor));
                     }else {
                         itemPaint.setColor(getColor(R.color.cleanItemBatteryLightColor));
                     }

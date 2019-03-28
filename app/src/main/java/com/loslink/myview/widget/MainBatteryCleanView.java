@@ -1,6 +1,7 @@
 package com.loslink.myview.widget;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +16,7 @@ import static com.loslink.myview.widget.BatteryCleanView.BatteryState.CheckFinis
 public class MainBatteryCleanView extends FrameLayout {
 
     private BatteryCleanView batteryCleanView;
-    private TextView tv_text,tv_clean;
+    private TextView tv_clean;
     private CleanClickListener cleanClickListener;
 
     public CleanClickListener getCleanClickListener() {
@@ -43,7 +44,6 @@ public class MainBatteryCleanView extends FrameLayout {
     private void findViews(Context context) {
         View view = LayoutInflater.from(context).inflate(R.layout.main_battery_clean_view, this);
         batteryCleanView = view.findViewById(R.id.batteryCleanView);
-        tv_text = view.findViewById(R.id.tv_text);
         tv_clean = view.findViewById(R.id.tv_clean);
     }
 
@@ -72,19 +72,17 @@ public class MainBatteryCleanView extends FrameLayout {
         batteryCleanView.setCleanState(cleanState);
         switch (cleanState){
             case Checking:
-                tv_text.setVisibility(View.VISIBLE);
                 tv_clean.setVisibility(View.GONE);
                 break;
             case CheckFinish:
-                tv_text.setVisibility(View.VISIBLE);
                 tv_clean.setVisibility(View.VISIBLE);
-                tv_clean.setText("CLEAN");
+                tv_clean.setBackgroundResource(R.drawable.shape_clean_button);
+                tv_clean.setText("OPTIMIZE");
                 break;
             case BestState:
-                tv_text.setVisibility(View.VISIBLE);
                 tv_clean.setVisibility(View.VISIBLE);
-                tv_clean.setText("CHECK");
-                tv_text.setText("Best state");
+                tv_clean.setText("EXCCELLENT");
+                tv_clean.setBackgroundColor(Color.argb(0,0,0,0));
                 break;
         }
     }
@@ -95,7 +93,6 @@ public class MainBatteryCleanView extends FrameLayout {
 
     public void setJunkFileSize(float junkFileSize){
         batteryCleanView.setJunkFileSize(junkFileSize);
-        tv_text.setText((int)junkFileSize+" MB");
     }
 
 

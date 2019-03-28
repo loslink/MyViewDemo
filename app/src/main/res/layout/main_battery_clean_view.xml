@@ -15,33 +15,23 @@
         />
 
     <LinearLayout
-        android:layout_width="170dp"
-        android:layout_height="170dp"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
         android:padding="25dp"
         android:background="@mipmap/ic_launcher_round2"
-        android:orientation="vertical"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
         android:layout_gravity="center">
 
         <TextView
-            android:id="@+id/tv_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Junk Files Found"
-            android:gravity="center_horizontal"
-            android:layout_gravity="center_horizontal"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="#ffffff"/>
-
-        <TextView
             android:id="@+id/tv_clean"
-            android:layout_width="120dp"
+            android:layout_width="100dp"
             android:layout_height="36dp"
-            android:text="CLEAN"
+            android:text="OPTIMIZE"
             android:layout_marginTop="10dp"
             android:gravity="center"
-            android:layout_gravity="center_horizontal"
-            android:textSize="18sp"
+            android:layout_gravity="bottom"
+            android:textSize="12sp"
             android:textStyle="bold"
             android:textColor="#323232"
             android:background="@drawable/shape_clean_button"/>
