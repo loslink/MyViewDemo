@@ -15,6 +15,7 @@
         />
 
     <LinearLayout
+        android:id="@+id/ll_bg"
         android:layout_width="160dp"
         android:layout_height="160dp"
         android:padding="25dp"

@@ -36,7 +36,6 @@ public class BatteryCleanView extends View {
     private Path itemPath;
     private boolean isStart = false;
     private BatteryState currentCleanState;
-    private float junkFileSize;
     private int blueItemCount = 6;
 
     public BatteryCleanView(Context context) {
@@ -135,6 +134,9 @@ public class BatteryCleanView extends View {
                         itemPaint.setColor(getColor(R.color.cleanItemBatteryLightColor));
                     }
                     break;
+                case BestState:
+                    itemPaint.setColor(getColor(R.color.cleanItemBatteryDarkColor));
+                    break;
             }
             canvas.drawPath(itemPath, itemPaint);
 
@@ -157,10 +159,6 @@ public class BatteryCleanView extends View {
 
     public BatteryState getCleanState(){
         return currentCleanState;
-    }
-
-    public void setJunkFileSize(float junkFileSize) {
-        this.junkFileSize = junkFileSize;
     }
 
     /**

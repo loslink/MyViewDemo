@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.loslink.myview.R;
@@ -17,6 +18,7 @@ public class MainBatteryCleanView extends FrameLayout {
 
     private BatteryCleanView batteryCleanView;
     private TextView tv_clean;
+    private LinearLayout ll_bg;
     private CleanClickListener cleanClickListener;
 
     public CleanClickListener getCleanClickListener() {
@@ -44,7 +46,9 @@ public class MainBatteryCleanView extends FrameLayout {
     private void findViews(Context context) {
         View view = LayoutInflater.from(context).inflate(R.layout.main_battery_clean_view, this);
         batteryCleanView = view.findViewById(R.id.batteryCleanView);
+        ll_bg = view.findViewById(R.id.ll_bg);
         tv_clean = view.findViewById(R.id.tv_clean);
+        setBatteryPower(100);
     }
 
     private void setListenr(){
@@ -91,8 +95,14 @@ public class MainBatteryCleanView extends FrameLayout {
         batteryCleanView.startAnimation();
     }
 
-    public void setJunkFileSize(float junkFileSize){
-        batteryCleanView.setJunkFileSize(junkFileSize);
+    public void setBatteryPower(int power){
+        if(power>=50){
+            ll_bg.setBackgroundResource(R.mipmap.ic_launcher_round2);
+        }else if(power>=20){
+            ll_bg.setBackgroundResource(R.mipmap.ic_launcher_round2);
+        }else{
+            ll_bg.setBackgroundResource(R.mipmap.ic_launcher_round2);
+        }
     }
 
 
