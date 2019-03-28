@@ -31,6 +31,6 @@
     <color name="cleanItemGrayColor">#c8c8c8</color>
 
     <color name="cleanItemDetailLightColor">#d4daf2</color>
-    <color name="cleanItemBatteryLightColor">#e8f1ed</color>
+    <color name="cleanItemBatteryLightColor">#e0e9e3</color>
     <color name="cleanItemBatteryDarkColor">#39d7d2</color>
 </resources>

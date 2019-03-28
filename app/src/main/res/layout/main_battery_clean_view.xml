@@ -1,44 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_vertical">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f4fbf7"
+    android:gravity="center_vertical">
 
     <com.loslink.myview.widget.BatteryCleanView
         android:id="@+id/batteryCleanView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
-        />
+        android:layout_gravity="center" />
 
     <LinearLayout
         android:id="@+id/ll_bg"
-        android:layout_width="160dp"
-        android:layout_height="160dp"
-        android:padding="25dp"
-        android:background="@mipmap/ic_launcher_round2"
-        android:orientation="horizontal"
+        android:layout_width="210dp"
+        android:layout_height="210dp"
+        android:layout_gravity="center"
+        android:background="@mipmap/main_battery_green"
         android:gravity="center_horizontal"
-        android:layout_gravity="center">
+        android:orientation="horizontal"
+        android:padding="30dp">
 
         <TextView
             android:id="@+id/tv_clean"
-            android:layout_width="100dp"
-            android:layout_height="36dp"
-            android:text="OPTIMIZE"
-            android:layout_marginTop="10dp"
-            android:gravity="center"
+            android:layout_width="108dp"
+            android:layout_height="28dp"
             android:layout_gravity="bottom"
-            android:textSize="12sp"
-            android:textStyle="bold"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/shape_clean_button"
+            android:gravity="center"
+            android:lines="1"
+            android:text="OPTIMIZE"
             android:textColor="#323232"
-            android:background="@drawable/shape_clean_button"/>
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
     </LinearLayout>
-
 
 
 </FrameLayout>

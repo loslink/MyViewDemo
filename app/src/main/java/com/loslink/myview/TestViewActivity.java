@@ -136,15 +136,22 @@ public class TestViewActivity extends Activity {
             case 12:
                 mainBatteryCleanView.setVisibility(View.VISIBLE);
                 mainBatteryCleanView.setCleanState(BatteryCleanView.BatteryState.Checking);
-                mainBatteryCleanView.setBatteryPower(100);
                 mainBatteryCleanView.startAnimation();
                 mainBatteryCleanView.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         mainBatteryCleanView.setBatteryPower(20);
                         mainBatteryCleanView.setCleanState(BatteryCleanView.BatteryState.CheckFinish);
+                        mainBatteryCleanView.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                mainBatteryCleanView.setBatteryPower(10);
+                                mainBatteryCleanView.setCleanState(BatteryCleanView.BatteryState.BestState);
+                            }
+                        },2000);
                     }
                 },3500);
+
                 break;
         }
 

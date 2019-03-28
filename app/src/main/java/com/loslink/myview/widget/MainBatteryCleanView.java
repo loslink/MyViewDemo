@@ -81,11 +81,13 @@ public class MainBatteryCleanView extends FrameLayout {
             case CheckFinish:
                 tv_clean.setVisibility(View.VISIBLE);
                 tv_clean.setBackgroundResource(R.drawable.shape_clean_button);
+                tv_clean.setTextColor(Color.parseColor("#323232"));
                 tv_clean.setText("OPTIMIZE");
                 break;
             case BestState:
                 tv_clean.setVisibility(View.VISIBLE);
-                tv_clean.setText("EXCCELLENT");
+                tv_clean.setText("EXCELLENT");
+                tv_clean.setTextColor(Color.WHITE);
                 tv_clean.setBackgroundColor(Color.argb(0,0,0,0));
                 break;
         }
@@ -97,11 +99,11 @@ public class MainBatteryCleanView extends FrameLayout {
 
     public void setBatteryPower(int power){
         if(power>=50){
-            ll_bg.setBackgroundResource(R.mipmap.ic_launcher_round2);
+            ll_bg.setBackgroundResource(R.mipmap.main_battery_green);
         }else if(power>=20){
-            ll_bg.setBackgroundResource(R.mipmap.ic_launcher_round2);
+            ll_bg.setBackgroundResource(R.mipmap.main_battery_yellow);
         }else{
-            ll_bg.setBackgroundResource(R.mipmap.ic_launcher_round2);
+            ll_bg.setBackgroundResource(R.mipmap.main_battery_red);
         }
     }
 

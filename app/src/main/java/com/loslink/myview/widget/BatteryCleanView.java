@@ -24,7 +24,7 @@ public class BatteryCleanView extends View {
     private long duration = 1000;
     private Context context;
     private float canvasWidth, canvasHeight;
-    private float OUTER_RADIUS = 107;
+    private float OUTER_RADIUS = 120;
     private float BAR_WIDTH = 12;
     private float BAR_HEIGHT = 4;
     private float startDegree = 0, endDegree = 360f;
