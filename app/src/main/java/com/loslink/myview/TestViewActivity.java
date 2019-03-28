@@ -6,12 +6,14 @@ import android.support.annotation.Nullable;
 import android.view.View;
 
 import com.loslink.myview.widget.AirWingView;
+import com.loslink.myview.widget.BatteryCleanView;
 import com.loslink.myview.widget.CleanDetailView;
 import com.loslink.myview.widget.CleanNewView;
 import com.loslink.myview.widget.CpuBoostView;
 import com.loslink.myview.widget.FloatBallView;
 import com.loslink.myview.widget.JunkCleanView;
 import com.loslink.myview.widget.MTextView;
+import com.loslink.myview.widget.MainBatteryCleanView;
 import com.loslink.myview.widget.MainCircleView;
 import com.loslink.myview.widget.MainCleanNewView;
 import com.loslink.myview.widget.MyView;
@@ -47,6 +49,8 @@ public class TestViewActivity extends Activity {
     MainCleanNewView mainCleanNewView;
     @BindView(R.id.cleanDetailView)
     CleanDetailView cleanDetailView;
+    @BindView(R.id.mainBatteryCleanView)
+    MainBatteryCleanView mainBatteryCleanView;
 
 
     @Override
@@ -126,6 +130,17 @@ public class TestViewActivity extends Activity {
                     @Override
                     public void run() {
                         cleanDetailView.setCleanState(CleanDetailView.CleanDetailState.CheckFinish);
+                    }
+                },3500);
+                break;
+            case 12:
+                mainBatteryCleanView.setVisibility(View.VISIBLE);
+                mainBatteryCleanView.setCleanState(BatteryCleanView.BatteryState.Checking);
+                mainBatteryCleanView.startAnimation();
+                mainBatteryCleanView.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mainBatteryCleanView.setCleanState(BatteryCleanView.BatteryState.CheckFinish);
                     }
                 },3500);
                 break;

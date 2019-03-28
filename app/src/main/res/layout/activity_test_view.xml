@@ -154,5 +154,12 @@
         android:layout_centerHorizontal="true"
         android:visibility="gone" />
 
+    <com.loslink.myview.widget.MainBatteryCleanView
+        android:id="@+id/mainBatteryCleanView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone" />
+
 
 </android.support.constraint.ConstraintLayout>

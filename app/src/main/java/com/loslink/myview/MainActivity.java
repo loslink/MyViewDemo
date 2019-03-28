@@ -80,6 +80,11 @@ public class MainActivity extends Activity {
         startPage(11);
     }
 
+    @OnClick(R.id.bt_12)
+    public void bt_12(){
+        startPage(12);
+    }
+
     private void startPage(int value){
         Intent intent=new Intent(this,TestViewActivity.class);
         intent.putExtra(TestViewActivity.KEY_INTENT,value);
