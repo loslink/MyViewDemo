@@ -4,10 +4,8 @@ buildscript {
     ext.kotlin_version = '1.2.71'
     repositories {
         google()
-        jcenter()
-        maven {
-            url 'http://localhost:8081/nexus/content/repositories/thirdparty/'
-        }
+        maven{url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+        jcenter(){ url 'http://jcenter.bintray.com/'}
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
@@ -21,10 +19,8 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
-        maven {
-            url 'http://localhost:8081/nexus/content/repositories/thirdparty/'
-        }
+        maven{url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+        jcenter(){ url 'http://jcenter.bintray.com/'}
     }
 }
 

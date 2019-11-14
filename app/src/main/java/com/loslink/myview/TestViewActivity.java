@@ -2,13 +2,12 @@ package com.loslink.myview;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.view.View;
 
 import com.loslink.myview.widget.AirWingView;
 import com.loslink.myview.widget.BatteryCleanView;
 import com.loslink.myview.widget.CleanDetailView;
-import com.loslink.myview.widget.CleanNewView;
 import com.loslink.myview.widget.CpuBoostView;
 import com.loslink.myview.widget.FloatBallView;
 import com.loslink.myview.widget.JunkCleanView;

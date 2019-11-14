@@ -1,6 +1,6 @@
 package com.loslink.myview.model;
 
-import android.support.annotation.DrawableRes;
+import androidx.annotation.DrawableRes;
 
 public class ItemScenic implements ItemDrawable {
     @DrawableRes

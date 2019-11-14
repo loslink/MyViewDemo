@@ -1,6 +1,6 @@
 package com.loslink.myview.model;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ImageView;

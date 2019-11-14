@@ -1,7 +1,7 @@
 package com.loslink.myview.model;
 
 
-import android.support.annotation.DrawableRes;
+import androidx.annotation.DrawableRes;
 
 public class ItemAnimal implements ItemDrawable {
     @DrawableRes

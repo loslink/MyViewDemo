@@ -8,7 +8,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -16,15 +16,10 @@ import android.view.View;
 
 import com.loslink.myview.R;
 import com.loslink.myview.model.StitchHistoryAction;
-import com.loslink.myview.model.StitchImageInfo;
 import com.loslink.myview.utils.DipToPx;
 import com.loslink.myview.utils.rx.RxTask;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
