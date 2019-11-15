@@ -47,6 +47,13 @@ public class MainCleanNewView extends FrameLayout {
         super(context, attrs, defStyleAttr);
         findViews(context);
         setListenr();
+
+//        ViewCompat.animate(view)
+//                .translationX(-view.getWidth() * 4)
+//                .alpha(0)
+//                .setDuration(900)
+//                .setStartDelay(100 * (i - first))
+//                .start();
     }
 
     private void findViews(Context context) {
