@@ -107,6 +107,13 @@
                 android:text="省电主页动画"
                 android:layout_margin="5dp"/>
 
+            <Button
+                android:id="@+id/bt_13"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:text="线条"
+                android:layout_margin="5dp"/>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

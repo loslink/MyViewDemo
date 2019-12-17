@@ -11,6 +11,7 @@ import com.loslink.myview.widget.CleanDetailView;
 import com.loslink.myview.widget.CpuBoostView;
 import com.loslink.myview.widget.FloatBallView;
 import com.loslink.myview.widget.JunkCleanView;
+import com.loslink.myview.widget.LineView;
 import com.loslink.myview.widget.MTextView;
 import com.loslink.myview.widget.MainBatteryCleanView;
 import com.loslink.myview.widget.MainCircleView;
@@ -50,6 +51,8 @@ public class TestViewActivity extends Activity {
     CleanDetailView cleanDetailView;
     @BindView(R.id.mainBatteryCleanView)
     MainBatteryCleanView mainBatteryCleanView;
+    @BindView(R.id.lineView)
+    LineView lineView;
 
 
     @Override
@@ -150,6 +153,10 @@ public class TestViewActivity extends Activity {
                         },2000);
                     }
                 },3500);
+
+                break;
+            case 13:
+                lineView.setVisibility(View.VISIBLE);
 
                 break;
         }
