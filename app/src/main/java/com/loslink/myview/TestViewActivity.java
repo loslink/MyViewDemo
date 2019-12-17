@@ -1,6 +1,7 @@
 package com.loslink.myview;
 
 import android.app.Activity;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import android.view.View;
@@ -16,6 +17,7 @@ import com.loslink.myview.widget.MTextView;
 import com.loslink.myview.widget.MainBatteryCleanView;
 import com.loslink.myview.widget.MainCircleView;
 import com.loslink.myview.widget.MainCleanNewView;
+import com.loslink.myview.widget.MapLayerView;
 import com.loslink.myview.widget.MyView;
 import com.loslink.myview.widget.RotateView;
 import com.loslink.myview.widget.SwitchButton;
@@ -53,6 +55,8 @@ public class TestViewActivity extends Activity {
     MainBatteryCleanView mainBatteryCleanView;
     @BindView(R.id.lineView)
     LineView lineView;
+    @BindView(R.id.mapLayerView)
+    MapLayerView mapLayerView;
 
 
     @Override
@@ -158,6 +162,10 @@ public class TestViewActivity extends Activity {
             case 13:
                 lineView.setVisibility(View.VISIBLE);
 
+                break;
+            case 14:
+                mapLayerView.setVisibility(View.VISIBLE);
+                mapLayerView.setImage(BitmapFactory.decodeResource(getResources(), R.mipmap.test));
                 break;
         }
 

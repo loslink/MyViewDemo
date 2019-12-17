@@ -19,7 +19,7 @@ import com.loslink.myview.widget.photoview.PhotoView;
 import com.loslink.myview.widget.photoview.listener.OnMatrixChangedListener;
 import com.loslink.myview.widget.photoview.listener2.BzlDispatchTouchEventListener;
 
-public class MapLayerView extends FrameLayout{
+public class MapLayerView extends FrameLayout {
 
     private Context mContext;
     private static final String TAG = MapLayerView.class.getSimpleName();
@@ -27,7 +27,6 @@ public class MapLayerView extends FrameLayout{
     private PhotoView photoView;            // 地图层
     private RectF tempRectF;
     private Matrix photoViewMatrix;
-    boolean firstLoadPhotoView = true;
     Mode curMode = Mode.TOUCH;
     private Bitmap mBitmap;
 
@@ -37,13 +36,6 @@ public class MapLayerView extends FrameLayout{
         GO,
         ADD_STATION
     }
-    public enum Marker {
-        AGV,
-        MISSION,
-        STATION
-    }
-
-
 
     public MapLayerView(@NonNull Context context) {
         this(context, null);
@@ -83,8 +75,8 @@ public class MapLayerView extends FrameLayout{
                     case MotionEvent.ACTION_UP:
 
                         break;
-                        case MotionEvent.ACTION_MOVE:
-                            break;
+                    case MotionEvent.ACTION_MOVE:
+                        break;
                 }
                 return true;
             }
@@ -100,8 +92,6 @@ public class MapLayerView extends FrameLayout{
 
         }
     };
-
-
 
     private PointF getOriginPoint(float x, float y) {
         float[] eventXY = new float[]{x, y};
@@ -140,7 +130,6 @@ public class MapLayerView extends FrameLayout{
         photoView.setImageBitmap(bmp);
         photoView.setDisplayMatrix(tmpMatrix);
         tempRectF = photoView.getDisplayRect();
-        photoView.setImageBitmap(null);
         mBitmap = bmp;
     }
 
