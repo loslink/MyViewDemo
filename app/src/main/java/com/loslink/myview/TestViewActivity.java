@@ -2,10 +2,15 @@ package com.loslink.myview;
 
 import android.app.Activity;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.DrawableWrapper;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.drawable.DrawableCompat;
+
 import android.view.View;
 
+import com.google.android.material.drawable.DrawableUtils;
 import com.loslink.myview.widget.AirWingView;
 import com.loslink.myview.widget.BatteryCleanView;
 import com.loslink.myview.widget.CleanDetailView;
@@ -20,6 +25,7 @@ import com.loslink.myview.widget.MainCleanNewView;
 import com.loslink.myview.widget.MapLayerView;
 import com.loslink.myview.widget.MyView;
 import com.loslink.myview.widget.RotateView;
+import com.loslink.myview.widget.ScrollerLayout;
 import com.loslink.myview.widget.SwitchButton;
 
 import butterknife.BindView;
@@ -57,6 +63,8 @@ public class TestViewActivity extends Activity {
     LineView lineView;
     @BindView(R.id.mapLayerView)
     MapLayerView mapLayerView;
+    @BindView(R.id.scrollerLayout)
+    ScrollerLayout scrollerLayout;
 
 
     @Override
@@ -165,7 +173,10 @@ public class TestViewActivity extends Activity {
                 break;
             case 14:
                 mapLayerView.setVisibility(View.VISIBLE);
-                mapLayerView.setImage(BitmapFactory.decodeResource(getResources(), R.mipmap.test));
+                mapLayerView.setImage(BitmapFactory.decodeResource(getResources(), R.mipmap.map));
+                break;
+            case 15:
+                scrollerLayout.setVisibility(View.VISIBLE);
                 break;
         }
 

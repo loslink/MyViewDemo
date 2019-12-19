@@ -15,6 +15,7 @@ import androidx.annotation.AttrRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.loslink.myview.utils.DipToPx;
 import com.loslink.myview.widget.photoview.PhotoView;
 import com.loslink.myview.widget.photoview.listener.OnMatrixChangedListener;
 import com.loslink.myview.widget.photoview.listener2.BzlDispatchTouchEventListener;
@@ -29,6 +30,7 @@ public class MapLayerView extends FrameLayout {
     private Matrix photoViewMatrix;
     Mode curMode = Mode.TOUCH;
     private Bitmap mBitmap;
+    private MapStationLayout mapStationLayout;
 
     public enum Mode {
         TOUCH,
@@ -54,32 +56,61 @@ public class MapLayerView extends FrameLayout {
         mContext = context;
         photoView = new PhotoView(context);
         photoView.setMaximumScale(8);
-        LayoutParams layoutParams =
-                new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        LayoutParams layoutParams =new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         addView(photoView, layoutParams);
         photoView.setOnMatrixChangeListener(matrixChangedListener);
+
+        mapStationLayout = new MapStationLayout(context);
+        LayoutParams lpStation =new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        addView(mapStationLayout, lpStation);
 
         handleGesture();
     }
 
+    private PointF downPoint = new PointF();
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        int action = event.getAction();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                photoView.dispatchTouchEvent(event);
+                break;
+            case MotionEvent.ACTION_UP:
+                photoView.dispatchTouchEvent(event);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                float disX = event.getX()-downPoint.x;
+                float disY = event.getY()-downPoint.y;
+                if(disX > DipToPx.dipToPx(getContext(),10) || disY > DipToPx.dipToPx(getContext(),10)){
+                    photoView.dispatchTouchEvent(event);
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                photoView.dispatchTouchEvent(event);
+                break;
+            default:
+                photoView.dispatchTouchEvent(event);
+                break;
+        }
+        return super.onInterceptTouchEvent(event);
+    }
+
     private void handleGesture() {
         photoView.setAllowDispatchTouchEvent(true);
-        photoView.setBzlDispatchTouchEventListener(new BzlDispatchTouchEventListener() {
-            @Override
-            public boolean dispatchTouchEvent(MotionEvent event) {
-                int action = event.getAction();
-                switch (action & MotionEvent.ACTION_MASK) {
-                    case MotionEvent.ACTION_DOWN:
+        photoView.setBzlDispatchTouchEventListener(event -> {
+            int action = event.getAction();
+            switch (action & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_DOWN:
 
-                        break;
-                    case MotionEvent.ACTION_UP:
+                    break;
+                case MotionEvent.ACTION_UP:
 
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        break;
-                }
-                return true;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    break;
             }
+            return true;
         });
 
     }
@@ -87,9 +118,10 @@ public class MapLayerView extends FrameLayout {
     OnMatrixChangedListener matrixChangedListener = new OnMatrixChangedListener() {
         @Override
         public void onMatrixChanged(RectF rectF) {
-
-            Matrix mImageMatrix = photoView.getImageMatrix();
-
+//            Matrix mImageMatrix = photoView.getImageMatrix();
+            Matrix mImageMatrix = new Matrix();
+            photoView.getAttacher().getSuppMatrix(mImageMatrix);//得到图片缩放旋转矩阵，去掉初始化矩阵干扰
+            mapStationLayout.setMatrix(mImageMatrix);
         }
     };
 
