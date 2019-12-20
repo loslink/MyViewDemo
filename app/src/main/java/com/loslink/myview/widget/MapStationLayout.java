@@ -88,10 +88,10 @@ public class MapStationLayout extends FrameLayout {
             public boolean onSingleTapUp(MotionEvent e) {
 
                 int index=checkTouchLineIndex(e.getX(),e.getY());
-                if(index != -1){
+//                if(index != -1){
                     touchLineIndex = index;
                     invalidate();
-                }
+//                }
                 GbLog.d("checkTouchLineIndex:"+index);
 
                 return super.onSingleTapUp(e);
@@ -113,11 +113,7 @@ public class MapStationLayout extends FrameLayout {
                 gestureDetector.onTouchEvent(event);
                 touchStationIndex=checkTouchStationIndex(event.getX(),event.getY());
                 touchControllerIndex=checkTouchControllerIndex(event.getX(),event.getY());
-                if(touchStationIndex!=-1 || touchControllerIndex!=-1){
-                    eventOnlyDo = true;
-                }else{
-                    eventOnlyDo = false;
-                }
+
                 mutiFingers = false;
                 return true;
             case MotionEvent.ACTION_POINTER_DOWN://第二根手指按下
@@ -127,22 +123,27 @@ public class MapStationLayout extends FrameLayout {
                 break;
             case MotionEvent.ACTION_MOVE:
                 gestureDetector.onTouchEvent(event);
+
+                if(touchStationIndex!=-1 || touchControllerIndex!=-1){//点中站点或控制点
+                    eventOnlyDo = true;
+                }else{
+                    eventOnlyDo = false;
+                }
                 if(eventOnlyDo){
                     moveStation(event.getX(),event.getY());
                     moveController(event.getX(),event.getY());
                 }
+
                 float disX = event.getX()-downPoint.x;
                 float disY = event.getY()-downPoint.y;
+
                 //长按移动无效
                 if(disX > DipToPx.dipToPx(getContext(),10) || disY > DipToPx.dipToPx(getContext(),10)){
                     isLongPress = false;
-                }else {
-                    eventOnlyDo = true;
                 }
                 if(mutiFingers){//多指触发，让给photo处理
                     eventOnlyDo = false;
                 }
-
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
@@ -255,10 +256,10 @@ public class MapStationLayout extends FrameLayout {
         }
         linePaint.setColor(lineColor);
         canvas.drawPath(cubicPath, linePaint);
-        linePaint.setColor(Color.RED);
-        canvas.drawPath(editPath, linePaint);
 
         if(touchLineIndex!=-1){
+            linePaint.setColor(Color.RED);
+            canvas.drawPath(editPath, linePaint);
             //绘制控制点
             canvas.drawCircle(stations.get(touchLineIndex+1).ctrlDisplayX,stations.get(touchLineIndex+1).ctrlDisplayY,20, ctrlPaint);
         }
@@ -319,7 +320,7 @@ public class MapStationLayout extends FrameLayout {
                 float x = (1 - t) * (1 - t) * preStation.displayX + 2 * t * (1-t) * station.ctrlDisplayX + t * t * station.displayX;
                 float y = (1 - t) * (1 - t) * preStation.displayY + 2 * t * (1-t) * station.ctrlDisplayY + t * t * station.displayY;
                 double distance = Math.sqrt((touchX-x)*(touchX-x)+(touchY-y)*(touchY-y));
-                if(distance<=TOUCH_RADIUS){
+                if(distance<=DipToPx.dipToPx(mContext,TOUCH_RADIUS)){
                     return i-1;
                 }
             }
@@ -337,7 +338,7 @@ public class MapStationLayout extends FrameLayout {
         for(int i=0;i<stations.size();i++){
             Station station=stations.get(i);
             double distance = Math.sqrt((touchX-station.displayX)*(touchX-station.displayX)+(touchY-station.displayY)*(touchY-station.displayY));
-            if(distance <= TOUCH_RADIUS){
+            if(distance <= DipToPx.dipToPx(mContext,TOUCH_RADIUS)){
                 return i;
             }
         }
@@ -354,7 +355,7 @@ public class MapStationLayout extends FrameLayout {
         for(int i=0;i<stations.size();i++){
             Station station=stations.get(i);
             double distance = Math.sqrt((touchX-station.ctrlDisplayX)*(touchX-station.ctrlDisplayX)+(touchY-station.ctrlDisplayY)*(touchY-station.ctrlDisplayY));
-            if(distance <= TOUCH_RADIUS){
+            if(distance <= DipToPx.dipToPx(mContext,TOUCH_RADIUS)){
                 return i;
             }
         }
