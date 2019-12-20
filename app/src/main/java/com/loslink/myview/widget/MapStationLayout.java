@@ -37,6 +37,10 @@ public class MapStationLayout extends FrameLayout {
     private int controllerColor = Color.parseColor("#33ff0000");
     private final int TOUCH_RADIUS = 10;
     private int touchLineIndex = -1;
+    private int touchStationIndex = -1;//点击的站点
+    private int touchControllerIndex = -1;//点击的控制点
+    private boolean eventOnlyDo = false;
+    private boolean mutiFingers = false;//多指触摸
 
     public MapStationLayout(Context context) {
         this(context, null);
@@ -97,38 +101,98 @@ public class MapStationLayout extends FrameLayout {
     }
 
 
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_DOWN://第一根手指按下
                 downPoint.x = event.getX();
                 downPoint.y = event.getY();
                 isLongPress = true;
                 gestureDetector.onTouchEvent(event);
+                touchStationIndex=checkTouchStationIndex(event.getX(),event.getY());
+                touchControllerIndex=checkTouchControllerIndex(event.getX(),event.getY());
+                if(touchStationIndex!=-1 || touchControllerIndex!=-1){
+                    eventOnlyDo = true;
+                }else{
+                    eventOnlyDo = false;
+                }
+                mutiFingers = false;
                 return true;
-            case MotionEvent.ACTION_POINTER_DOWN:
+            case MotionEvent.ACTION_POINTER_DOWN://第二根手指按下
                 isLongPress = false;
+                eventOnlyDo = false;
+                mutiFingers = true;
                 break;
             case MotionEvent.ACTION_MOVE:
                 gestureDetector.onTouchEvent(event);
+                if(eventOnlyDo){
+                    moveStation(event.getX(),event.getY());
+                    moveController(event.getX(),event.getY());
+                }
                 float disX = event.getX()-downPoint.x;
                 float disY = event.getY()-downPoint.y;
-                //小区域长按有效
+                //长按移动无效
                 if(disX > DipToPx.dipToPx(getContext(),10) || disY > DipToPx.dipToPx(getContext(),10)){
                     isLongPress = false;
+                }else {
+                    eventOnlyDo = true;
                 }
+                if(mutiFingers){//多指触发，让给photo处理
+                    eventOnlyDo = false;
+                }
+
                 break;
             case MotionEvent.ACTION_UP:
-                gestureDetector.onTouchEvent(event);
-                break;
             case MotionEvent.ACTION_CANCEL:
                 gestureDetector.onTouchEvent(event);
+                eventOnlyDo = false;
+                mutiFingers = false;
                 break;
         }
         return super.onTouchEvent(event);
     }
 
+    /**
+     * 触摸事件是否只给该视图处理
+     * @return
+     */
+    public boolean isEventOnlyDo() {
+        return eventOnlyDo;
+    }
+
+
+    private void moveStation(float touchX,float touchY){
+        if(touchStationIndex != -1){
+            Station touchStation = stations.get(touchStationIndex);
+            PointF pointF=getOriginPoint(touchX,touchY);//得到相对地图复原状态时的坐标
+            touchStation.x = pointF.x;
+            touchStation.y = pointF.y;
+            touchStation.displayX = touchX;
+            touchStation.displayY = touchY;
+            invalidate();
+        }
+
+    }
+
+    private void moveController(float touchX,float touchY){
+        if(touchControllerIndex != -1){
+            Station touchController = stations.get(touchControllerIndex);
+            PointF pointF=getOriginPoint(touchX,touchY);//得到相对地图复原状态时的坐标
+            touchController.ctrlX = pointF.x;
+            touchController.ctrlY = pointF.y;
+            touchController.ctrlDisplayX = touchX;
+            touchController.ctrlDisplayY = touchY;
+            invalidate();
+        }
+
+    }
+
+    /**
+     * 外部传入变换矩阵，图片的变换
+     * @param matrix
+     */
     public void setMatrix(Matrix matrix){
         transformMatrix = matrix;
         for(int i=0;i<stations.size();i++){
@@ -155,6 +219,10 @@ public class MapStationLayout extends FrameLayout {
         drawStations(canvas);
     }
 
+    /**
+     * 绘制站点
+     * @param canvas
+     */
     private void drawStations(Canvas canvas){
         for(int i=0;i<stations.size();i++){
             Station station=stations.get(i);
@@ -162,6 +230,10 @@ public class MapStationLayout extends FrameLayout {
         }
     }
 
+    /**
+     * 绘制线条
+     * @param canvas
+     */
     private void drawLines(Canvas canvas){
         cubicPath.reset();
         for(int i=0;i<stations.size();i++){
@@ -170,12 +242,12 @@ public class MapStationLayout extends FrameLayout {
                 cubicPath.moveTo(station.displayX,station.displayY);
             }else{
                 Station preStation = stations.get(i-1);
-                cubicPath.cubicTo(preStation.displayX,preStation.displayY,(station.displayX+preStation.displayX)/2 ,(station.displayY+preStation.displayY)/2,station.displayX,station.displayY);
+                cubicPath.cubicTo(preStation.displayX,preStation.displayY,station.ctrlDisplayX ,station.ctrlDisplayY,station.displayX,station.displayY);
 
                 if(touchLineIndex!=-1 && touchLineIndex == i-1){
                     editPath.reset();
                     editPath.moveTo(preStation.displayX,preStation.displayY);
-                    editPath.cubicTo(preStation.displayX,preStation.displayY,(station.displayX+preStation.displayX)/2 ,(station.displayY+preStation.displayY)/2,station.displayX,station.displayY);
+                    editPath.cubicTo(preStation.displayX,preStation.displayY,station.ctrlDisplayX ,station.ctrlDisplayY,station.displayX,station.displayY);
 
                 }
             }
@@ -207,7 +279,6 @@ public class MapStationLayout extends FrameLayout {
         station.displayY = y;
         if(stations.size() > 0){//非首站点添加控制点
             Station preStation = stations.get(stations.size()-1);
-            PointF preP=getOriginPoint(preStation.x,preStation.y);
             station.ctrlX = (pointF.x + preStation.x)/2;
             station.ctrlY = (pointF.y + preStation.y)/2;
             station.ctrlDisplayX = (x + preStation.displayX)/2;
@@ -229,6 +300,7 @@ public class MapStationLayout extends FrameLayout {
         matrix.mapPoints(eventXY);
         return new PointF(eventXY[0], eventXY[1]);
     }
+
 
     /**
      * 检测点中哪条线
@@ -252,7 +324,40 @@ public class MapStationLayout extends FrameLayout {
                 }
             }
         }
+        return -1;
+    }
 
+    /**
+     * 检测点中哪个站点
+     * @param touchX
+     * @param touchY
+     * @return
+     */
+    private int checkTouchStationIndex(float touchX,float touchY){
+        for(int i=0;i<stations.size();i++){
+            Station station=stations.get(i);
+            double distance = Math.sqrt((touchX-station.displayX)*(touchX-station.displayX)+(touchY-station.displayY)*(touchY-station.displayY));
+            if(distance <= TOUCH_RADIUS){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * 检测点中哪个控制点
+     * @param touchX
+     * @param touchY
+     * @return
+     */
+    private int checkTouchControllerIndex(float touchX,float touchY){
+        for(int i=0;i<stations.size();i++){
+            Station station=stations.get(i);
+            double distance = Math.sqrt((touchX-station.ctrlDisplayX)*(touchX-station.ctrlDisplayX)+(touchY-station.ctrlDisplayY)*(touchY-station.ctrlDisplayY));
+            if(distance <= TOUCH_RADIUS){
+                return i;
+            }
+        }
         return -1;
     }
 }

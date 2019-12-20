@@ -18,7 +18,6 @@ import androidx.annotation.Nullable;
 import com.loslink.myview.utils.DipToPx;
 import com.loslink.myview.widget.photoview.PhotoView;
 import com.loslink.myview.widget.photoview.listener.OnMatrixChangedListener;
-import com.loslink.myview.widget.photoview.listener2.BzlDispatchTouchEventListener;
 
 public class MapLayerView extends FrameLayout {
 
@@ -80,9 +79,7 @@ public class MapLayerView extends FrameLayout {
                 photoView.dispatchTouchEvent(event);
                 break;
             case MotionEvent.ACTION_MOVE:
-                float disX = event.getX()-downPoint.x;
-                float disY = event.getY()-downPoint.y;
-                if(disX > DipToPx.dipToPx(getContext(),10) || disY > DipToPx.dipToPx(getContext(),10)){
+                if(!mapStationLayout.isEventOnlyDo()){//非站点layout使用
                     photoView.dispatchTouchEvent(event);
                 }
                 break;
