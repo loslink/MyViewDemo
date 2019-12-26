@@ -1,21 +1,27 @@
 package com.loslink.myview.widget;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
 
+import com.loslink.myview.R;
 import com.loslink.myview.utils.DipToPx;
 import com.loslink.myview.utils.GbLog;
 import com.loslink.myview.widget.bean.Station;
+import com.loslink.myview.widget.drawable.StationDrawable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,7 +83,7 @@ public class MapStationLayout extends FrameLayout {
             @Override
             public void onLongPress(MotionEvent e) {
                 super.onLongPress(e);
-                if(isLongPress){
+                if(isLongPress && touchStationIndex==-1){//没按住站点
                     addStation(e.getX(),e.getY());
                     invalidate();
                 }
@@ -227,8 +233,26 @@ public class MapStationLayout extends FrameLayout {
     private void drawStations(Canvas canvas){
         for(int i=0;i<stations.size();i++){
             Station station=stations.get(i);
-            canvas.drawCircle(station.displayX,station.displayY,20, stationPaint);
+//            canvas.drawCircle(station.displayX,station.displayY,20, stationPaint);
+            canvas.drawBitmap(drawableToBitmap(new StationDrawable(20f, R.color.bgEndColor,"1",10)),station.displayX,station.displayY,stationPaint);
         }
+    }
+
+    /**
+     * Drawable转换成一个Bitmap
+     *
+     * @param drawable drawable对象
+     * @return
+     */
+    public static final Bitmap drawableToBitmap(StationDrawable drawable) {
+        Bitmap bitmap = Bitmap.createBitmap((int)drawable.getWidth(), (int)drawable.getHeight(),
+                drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, (int)drawable.getWidth(), (int)drawable.getHeight());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            drawable.draw(canvas);
+        }
+        return bitmap;
     }
 
     /**
