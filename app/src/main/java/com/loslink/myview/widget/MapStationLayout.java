@@ -233,8 +233,8 @@ public class MapStationLayout extends FrameLayout {
     private void drawStations(Canvas canvas){
         for(int i=0;i<stations.size();i++){
             Station station=stations.get(i);
-//            canvas.drawCircle(station.displayX,station.displayY,20, stationPaint);
-            canvas.drawBitmap(drawableToBitmap(new StationDrawable(20f, R.color.bgEndColor,"1",10)),station.displayX,station.displayY,stationPaint);
+            canvas.drawCircle(station.displayX,station.displayY,20, stationPaint);
+//            canvas.drawBitmap(drawableToBitmap(new StationDrawable(20f, R.color.bgEndColor,"1",10)),station.displayX,station.displayY,stationPaint);
         }
     }
 
