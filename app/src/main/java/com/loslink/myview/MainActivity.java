@@ -16,7 +16,6 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        startPage(14);
     }
 
     @OnClick(R.id.bt_recycler)
@@ -98,6 +97,11 @@ public class MainActivity extends Activity {
     @OnClick(R.id.bt_15)
     public void bt_15(){
         startPage(15);
+    }
+
+    @OnClick(R.id.bt_16)
+    public void bt_16(){
+        startPage(16);
     }
 
     private void startPage(int value){

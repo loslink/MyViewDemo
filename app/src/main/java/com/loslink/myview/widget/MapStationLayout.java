@@ -214,6 +214,19 @@ public class MapStationLayout extends FrameLayout {
                 station.ctrlDisplayX=pointCtrl[0];
                 station.ctrlDisplayY=pointCtrl[1];
             }
+            if(i == 0){
+                cubicPath.moveTo(station.displayX,station.displayY);
+            }else{
+                Station preStation = stations.get(i-1);
+                cubicPath.cubicTo(preStation.displayX,preStation.displayY,station.ctrlDisplayX ,station.ctrlDisplayY,station.displayX,station.displayY);
+
+                if(touchLineIndex!=-1 && touchLineIndex == i-1){
+                    editPath.reset();
+                    editPath.moveTo(preStation.displayX,preStation.displayY);
+                    editPath.cubicTo(preStation.displayX,preStation.displayY,station.ctrlDisplayX ,station.ctrlDisplayY,station.displayX,station.displayY);
+
+                }
+            }
         }
         invalidate();
     }

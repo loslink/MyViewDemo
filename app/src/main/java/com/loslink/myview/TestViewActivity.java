@@ -15,6 +15,7 @@ import com.loslink.myview.widget.AirWingView;
 import com.loslink.myview.widget.BatteryCleanView;
 import com.loslink.myview.widget.CleanDetailView;
 import com.loslink.myview.widget.CpuBoostView;
+import com.loslink.myview.widget.FlexBoxLayout;
 import com.loslink.myview.widget.FloatBallView;
 import com.loslink.myview.widget.JunkCleanView;
 import com.loslink.myview.widget.LineView;
@@ -65,7 +66,8 @@ public class TestViewActivity extends Activity {
     MapLayerView mapLayerView;
     @BindView(R.id.scrollerLayout)
     ScrollerLayout scrollerLayout;
-
+    @BindView(R.id.flexBoxLayout)
+    FlexBoxLayout flexBoxLayout;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -177,6 +179,9 @@ public class TestViewActivity extends Activity {
                 break;
             case 15:
                 scrollerLayout.setVisibility(View.VISIBLE);
+                break;
+            case 16:
+                flexBoxLayout.setVisibility(View.VISIBLE);
                 break;
         }
 
