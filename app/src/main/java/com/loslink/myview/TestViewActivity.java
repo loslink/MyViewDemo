@@ -2,21 +2,18 @@ package com.loslink.myview;
 
 import android.app.Activity;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.DrawableWrapper;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.core.graphics.drawable.DrawableCompat;
-
 import android.view.View;
 
-import com.google.android.material.drawable.DrawableUtils;
+import androidx.annotation.Nullable;
+
 import com.loslink.myview.widget.AirWingView;
 import com.loslink.myview.widget.BatteryCleanView;
 import com.loslink.myview.widget.CleanDetailView;
 import com.loslink.myview.widget.CpuBoostView;
 import com.loslink.myview.widget.FlexBoxLayout;
 import com.loslink.myview.widget.FloatBallView;
+import com.loslink.myview.widget.HorizonalScrollerView;
 import com.loslink.myview.widget.JunkCleanView;
 import com.loslink.myview.widget.LineView;
 import com.loslink.myview.widget.MTextView;
@@ -35,6 +32,8 @@ import butterknife.ButterKnife;
 public class TestViewActivity extends Activity {
 
     public static String KEY_INTENT;
+    @BindView(R.id.horizonalScrollerView)
+    HorizonalScrollerView horizonalScrollerView;
     private int axtra;
     @BindView(R.id.mEffect)
     MyView mEffect;
@@ -78,13 +77,13 @@ public class TestViewActivity extends Activity {
         initView();
     }
 
-    private void getIntentData(){
-        axtra=getIntent().getIntExtra(KEY_INTENT,-1);
+    private void getIntentData() {
+        axtra = getIntent().getIntExtra(KEY_INTENT, -1);
     }
 
-    private void initView(){
+    private void initView() {
 
-        switch (axtra){
+        switch (axtra) {
             case 1:
                 mEffect.setVisibility(View.VISIBLE);
                 break;
@@ -147,7 +146,7 @@ public class TestViewActivity extends Activity {
                     public void run() {
                         cleanDetailView.setCleanState(CleanDetailView.CleanDetailState.CheckFinish);
                     }
-                },3500);
+                }, 3500);
                 break;
             case 12:
                 mainBatteryCleanView.setVisibility(View.VISIBLE);
@@ -164,9 +163,9 @@ public class TestViewActivity extends Activity {
                                 mainBatteryCleanView.setBatteryPower(10);
                                 mainBatteryCleanView.setCleanState(BatteryCleanView.BatteryState.BestState);
                             }
-                        },2000);
+                        }, 2000);
                     }
-                },3500);
+                }, 3500);
 
                 break;
             case 13:
@@ -183,20 +182,25 @@ public class TestViewActivity extends Activity {
             case 16:
                 flexBoxLayout.setVisibility(View.VISIBLE);
                 break;
+            case 17:
+                horizonalScrollerView.setVisibility(View.VISIBLE);
+                break;
+            default:
+                break;
         }
 
     }
 
-    private void analyseJunkFiles(){
+    private void analyseJunkFiles() {
         mainCleanNewView.setCleanState(MainCleanNewView.CleanState.Analysing);
         mainCleanNewView.startAnimation();
         new Thread(new Runnable() {
             @Override
             public void run() {
                 int size = 0;
-                while(true){
-                    size+=20;
-                    if(size>6000){
+                while (true) {
+                    size += 20;
+                    if (size > 6000) {
                         break;
                     }
                     try {
@@ -215,15 +219,15 @@ public class TestViewActivity extends Activity {
         }).start();
     }
 
-    private void checkJunkFiles(){
+    private void checkJunkFiles() {
         mainCleanNewView.setCleanState(MainCleanNewView.CleanState.Checking);
         mainCleanNewView.startAnimation();
         new Thread(new Runnable() {
             @Override
             public void run() {
                 int size = 0;
-                while(true){
-                    size+=20;
+                while (true) {
+                    size += 20;
                     final int finalSize = size;
                     runOnUiThread(new Runnable() {
                         @Override
@@ -232,7 +236,7 @@ public class TestViewActivity extends Activity {
                         }
                     });
 
-                    if(size>10000){
+                    if (size > 10000) {
                         break;
                     }
                     try {
@@ -254,7 +258,7 @@ public class TestViewActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mainCleanNewView!=null){
+        if (mainCleanNewView != null) {
             mainCleanNewView.destroy();
         }
     }

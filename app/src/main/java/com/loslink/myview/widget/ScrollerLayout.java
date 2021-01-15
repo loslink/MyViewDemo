@@ -10,6 +10,8 @@ import android.widget.Scroller;
 
 import androidx.core.view.ViewConfigurationCompat;
 
+import com.loslink.myview.utils.GbLog;
+
 public class ScrollerLayout extends ViewGroup {
 
     /**
@@ -98,6 +100,8 @@ public class ScrollerLayout extends ViewGroup {
                     return true;
                 }
                 break;
+            default:
+                break;
         }
         return super.onInterceptTouchEvent(ev);
     }
@@ -126,6 +130,8 @@ public class ScrollerLayout extends ViewGroup {
                 mScroller.startScroll(getScrollX(), 0, dx, 0);
                 invalidate();
                 break;
+            default:
+                break;
         }
         return super.onTouchEvent(event);
     }
@@ -134,6 +140,7 @@ public class ScrollerLayout extends ViewGroup {
     public void computeScroll() {
         // 第三步，重写computeScroll()方法，并在其内部完成平滑滚动的逻辑
         if (mScroller.computeScrollOffset()) {
+            GbLog.d("computeScroll:"+mScroller.getCurrX());
             scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
             invalidate();
         }
