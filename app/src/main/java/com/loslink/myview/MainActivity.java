@@ -1,10 +1,18 @@
 package com.loslink.myview;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+
+import android.text.InputType;
+import android.text.TextUtils;
 import android.view.View;
+import android.widget.Toast;
+
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -27,6 +35,7 @@ public class MainActivity extends Activity {
     @OnClick(R.id.bt_1)
     public void bt_1(){
         startPage(1);
+//        showEditTextDialog(this);
     }
 
     @OnClick(R.id.bt_2)
@@ -113,5 +122,33 @@ public class MainActivity extends Activity {
         Intent intent=new Intent(this,TestViewActivity.class);
         intent.putExtra(TestViewActivity.KEY_INTENT,value);
         startActivity(intent);
+    }
+
+    private void showEditTextDialog(Context context) {
+        final QMUIDialog.EditTextDialogBuilder builder = new QMUIDialog.EditTextDialogBuilder(context);
+        builder.setTitle("我是标题");
+        builder.setPlaceholder("在此输入昵称");
+        builder.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.addAction("取消", new QMUIDialogAction.ActionListener() {
+            @Override
+            public void onClick(QMUIDialog dialog, int index) {
+
+            }
+        });
+        builder.addAction("确定", new QMUIDialogAction.ActionListener() {
+            @Override
+            public void onClick(QMUIDialog dialog, int index) {
+                String inputStr=builder.getEditText().getText().toString();
+                if(!TextUtils.isEmpty(inputStr)){
+                    Toast.makeText(context,inputStr,Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                }else{
+                    Toast.makeText(context,"请输入昵称",Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+        builder.create().show();
+
     }
 }

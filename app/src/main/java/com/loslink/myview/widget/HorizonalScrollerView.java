@@ -40,7 +40,7 @@ public class HorizonalScrollerView extends View {
     private final int BLOCK_LENGTH = 200;
     private final int BLOCK_COUNT = 3000;
     private final int BLOCK_GAP = 0;
-    private final int BLOCK_SHOW_COUNT_CAPACITY = 15;
+    private final int BLOCK_SHOW_COUNT_CAPACITY = 6;
     private Scroller mScroller;
     private Context context;
     private Paint paint;
@@ -54,7 +54,7 @@ public class HorizonalScrollerView extends View {
     private int hideCount;
     private int showCountPerPage;
     private List<DataBean> originDataList = new ArrayList<>();
-    private List<DataBean> showDataList = new ArrayList<>(BLOCK_SHOW_COUNT_CAPACITY);
+    private List<DataBean> showDataList = new ArrayList<>();
 
     public HorizonalScrollerView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -91,7 +91,7 @@ public class HorizonalScrollerView extends View {
         //前面隐藏的个数
         hideCount = Math.abs(scrollX) / BLOCK_LENGTH;
         showCountPerPage = (int)(getWidth() / (float)BLOCK_LENGTH + 0.5f);
-        GbLog.d("HorizonalScrollerView hideCount:"+hideCount + ",showCountPerPage:"+showCountPerPage);
+//        GbLog.d("HorizonalScrollerView hideCount:"+hideCount + ",showCountPerPage:"+showCountPerPage);
 
         int showStartIndex = hideCount - (int)((BLOCK_SHOW_COUNT_CAPACITY - showCountPerPage) / 2 + 0.5f);
         if(showStartIndex < 0){
@@ -101,7 +101,7 @@ public class HorizonalScrollerView extends View {
         if(showEndIndex > showDataList.size() - 1){
             showEndIndex = showDataList.size() - 1;
         }
-        GbLog.d("HorizonalScrollerView showStartIndex:"+showStartIndex + ",showEndIndex:"+showEndIndex);
+//        GbLog.d("HorizonalScrollerView showStartIndex:"+showStartIndex + ",showEndIndex:"+showEndIndex);
 
         //队列中数据的下标范围
         int queueStartIndex = showDataList.get(0).index;
@@ -136,20 +136,24 @@ public class HorizonalScrollerView extends View {
                         int leftIndex = i + recycleCount;
                         //只需要填充满回收坑位
                         if(leftIndex < showDataList.size()){
-                            showDataList.add(i,showDataList.get(leftIndex));
+                            showDataList.set(i,showDataList.get(leftIndex));
                         }else{
-                            showDataList.add(i,tempList.get(leftIndex - showDataList.size()));
+                            DataBean dataBeanTemp = tempList.get(leftIndex - showDataList.size());
+                            dataBeanTemp.bitmap.recycle();
+                            dataBeanTemp.bitmap = loadBitmap();
+                            dataBeanTemp.index = showDataList.get(i-1).index + 1;
+                            showDataList.set(i,dataBeanTemp);
                         }
                     }else{
                         int index = i + recycleCount;
                         if(index < showDataList.size()){
-                            showDataList.add(i,showDataList.get(index));
+                            showDataList.set(i,showDataList.get(index));
                         }else {//回收的放后面
                             DataBean dataBean = tempList.get(index - showDataList.size());
                             dataBean.bitmap.recycle();
                             dataBean.bitmap = loadBitmap();
-                            dataBean.index = i;
-                            showDataList.add(i,dataBean);
+                            dataBean.index = showDataList.get(i-1).index + 1;
+                            showDataList.set(i,dataBean);
                         }
                     }
                 }
@@ -160,14 +164,15 @@ public class HorizonalScrollerView extends View {
 
                     //把后面回收的插在前面
                     if(i<recycleCount){
-                        int index = i + (showDataList.size() - recycleCount) - 1;
+                        int index = i + (showDataList.size() - recycleCount);
                         DataBean recycleData = showDataList.get(index);
-                        dataBean.bitmap.recycle();
+                        recycleData.bitmap.recycle();
                         recycleData.bitmap = loadBitmap();
-                        recycleData.index = i;
-                        showDataList.add(i,recycleData);
+                        recycleData.index = dataBean.index - recycleCount;
+                        showDataList.set(i,recycleData);
                     }else{//剩余部分右移
-                        showDataList.add(i,tempList.get(i - recycleCount));
+                        DataBean dataBeanTemp = tempList.get(i - recycleCount);
+                        showDataList.set(i,dataBeanTemp);
                     }
                 }
             }
