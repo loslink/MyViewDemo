@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 
@@ -38,9 +39,9 @@ import java.util.concurrent.PriorityBlockingQueue;
 public class HorizonalScrollerView extends View {
 
     private final int BLOCK_LENGTH = 200;
-    private final int BLOCK_COUNT = 3000;
+    private final int BLOCK_COUNT = 300;
     private final int BLOCK_GAP = 0;
-    private final int BLOCK_SHOW_COUNT_CAPACITY = 6;
+    private final int BLOCK_SHOW_COUNT_CAPACITY = 12;
     private Scroller mScroller;
     private Context context;
     private Paint paint;
@@ -53,8 +54,8 @@ public class HorizonalScrollerView extends View {
     private int viewWidth,viewHeight,contentWidth;
     private int hideCount;
     private int showCountPerPage;
-    private List<DataBean> originDataList = new ArrayList<>();
-    private List<DataBean> showDataList = new ArrayList<>();
+    private CopyOnWriteArrayList<DataBean> originDataList = new CopyOnWriteArrayList<>();
+    private CopyOnWriteArrayList<DataBean> showDataList = new CopyOnWriteArrayList<>();
 
     public HorizonalScrollerView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -86,12 +87,14 @@ public class HorizonalScrollerView extends View {
     }
 
 
-    private void handleQueue(){
+    private synchronized void handleQueue(){
+        GbLog.d("HorizonalScrollerView Thread.currentThread().getName():"+Thread.currentThread().getName());
         int scrollX = getScrollX();
         //前面隐藏的个数
         hideCount = Math.abs(scrollX) / BLOCK_LENGTH;
+        //一屏可显示几个
         showCountPerPage = (int)(getWidth() / (float)BLOCK_LENGTH + 0.5f);
-//        GbLog.d("HorizonalScrollerView hideCount:"+hideCount + ",showCountPerPage:"+showCountPerPage);
+        GbLog.d("HorizonalScrollerView hideCount:"+hideCount + ",showCountPerPage:"+showCountPerPage);
 
         int showStartIndex = hideCount - (int)((BLOCK_SHOW_COUNT_CAPACITY - showCountPerPage) / 2 + 0.5f);
         if(showStartIndex < 0){
@@ -101,12 +104,12 @@ public class HorizonalScrollerView extends View {
         if(showEndIndex > showDataList.size() - 1){
             showEndIndex = showDataList.size() - 1;
         }
-//        GbLog.d("HorizonalScrollerView showStartIndex:"+showStartIndex + ",showEndIndex:"+showEndIndex);
+        GbLog.d("HorizonalScrollerView showStartIndex:"+showStartIndex + ",showEndIndex:"+showEndIndex);
 
-        //队列中数据的下标范围
+        //处理前队列中数据的下标范围
         int queueStartIndex = showDataList.get(0).index;
         int queueEndIndex = showDataList.get(showDataList.size()-1).index;
-
+        GbLog.d("HorizonalScrollerView queueStartIndex:"+queueStartIndex + ",queueEndIndex:"+queueEndIndex);
         int recycleCount = 0;
         //是否回收前面的，否则回收后面的
         boolean isRecyclePre = false;
@@ -120,10 +123,19 @@ public class HorizonalScrollerView extends View {
             recycleCount = showStartIndex - queueStartIndex;
             isRecyclePre = true;
         }
+        GbLog.d("HorizonalScrollerView recycleCount:"+recycleCount
+                + ",queueStartIndex:"+queueStartIndex
+                + ",showStartIndex:"+showStartIndex
+        );
 
-        if(recycleCount > 0){
+        GbLog.d("HorizonalScrollerView showDataList.size():"+showDataList.size());
 
-            List<DataBean> tempList = new ArrayList<>();
+        int oneSideHideCount = (int)((BLOCK_SHOW_COUNT_CAPACITY - showCountPerPage) / 2f + 0.5);
+        GbLog.d("HorizonalScrollerView oneSideHideCount:" + oneSideHideCount);
+        //滑动太快，recycleCount会突增，导致越过showDataList数据区间
+        if(recycleCount > 0 && recycleCount <= oneSideHideCount){
+
+            CopyOnWriteArrayList<DataBean> tempList = new CopyOnWriteArrayList<>();
             //内容向左滑行,回收左边
             if(isRecyclePre){
                 for(int i = 0;i<showDataList.size();i++){
@@ -159,16 +171,18 @@ public class HorizonalScrollerView extends View {
                 }
             }else{//内容向右滑行，回收右边
                 for(int i = 0;i<showDataList.size();i++){
-                    DataBean dataBean = showDataList.get(i);
-                    tempList.add(dataBean);
+                    if(i < showDataList.size() - recycleCount){
+                        DataBean dataBean = showDataList.get(i);
+                        tempList.add(dataBean);
+                    }
 
                     //把后面回收的插在前面
-                    if(i<recycleCount){
+                    if(i < recycleCount){
                         int index = i + (showDataList.size() - recycleCount);
                         DataBean recycleData = showDataList.get(index);
                         recycleData.bitmap.recycle();
                         recycleData.bitmap = loadBitmap();
-                        recycleData.index = dataBean.index - recycleCount;
+                        recycleData.index = tempList.get(i).index - recycleCount;
                         showDataList.set(i,recycleData);
                     }else{//剩余部分右移
                         DataBean dataBeanTemp = tempList.get(i - recycleCount);
